@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "SDL2-2.0.8/include/SDL.h"
+#include <SDL.h>
 #include <vector>
 class Graphic {
 	public:

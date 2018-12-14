@@ -1,0 +1,19 @@
+# Created by https://www.gitignore.io/api/cmake
+# Edit at https://www.gitignore.io/?templates=cmake
+
+### CMake ###
+CMakeLists.txt
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+.vscode
+othello
+SDL2-2.0.8
+SDL2_net-2.0.1
+# End of https://www.gitignore.io/api/cmake
