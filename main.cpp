@@ -101,11 +101,10 @@ int main(int argc, char *argv[]) {
 						dialog.EndGameDialogBox(game->b, game->w, game->howturn);
 						game->full = false;
 					}
-					if (game->full)dialog.EndGameDialogBox(game->b, game->w, game->howturn);
+					//if (game->full)dialog.EndGameDialogBox(game->b, game->w, game->howturn);
 					break;
 				case SDL_QUIT:
 					if (dialog.QuitinGameDialogbox()) {
-						std::cout<<SDL_GetError();
 						game.release();
 						graphic.~Graphic();
 						SDL_Quit();
