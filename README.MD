@@ -1,5 +1,5 @@
 # Othhelo
-This is not othello, is this?
+This is not othello, is this?  
 
 # ビルド
 SDL2が必要です 使用しているOSに合わせてDevelopment Libraryを準備しておいてください  
