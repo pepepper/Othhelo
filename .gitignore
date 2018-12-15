@@ -4,7 +4,6 @@
 ### CMake ###
 CMakeLists.txt
 CMakeCache.txt
-CMakeFiles
 CMakeScripts
 Testing
 Makefile

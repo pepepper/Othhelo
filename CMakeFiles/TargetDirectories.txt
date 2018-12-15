@@ -1,0 +1,6 @@
+/home/shirasaka/OneDrive/othellosource/othello/CMakeFiles/rebuild_cache.dir
+/home/shirasaka/OneDrive/othellosource/othello/CMakeFiles/othello.dir
+/home/shirasaka/OneDrive/othellosource/othello/CMakeFiles/edit_cache.dir
+/home/shirasaka/OneDrive/othellosource/othello/Boxer/CMakeFiles/rebuild_cache.dir
+/home/shirasaka/OneDrive/othellosource/othello/Boxer/CMakeFiles/Boxer.dir
+/home/shirasaka/OneDrive/othellosource/othello/Boxer/CMakeFiles/edit_cache.dir
