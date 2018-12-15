@@ -2,8 +2,8 @@
 # Edit at https://www.gitignore.io/?templates=cmake
 
 ### CMake ###
-CMakeLists.txt
 CMakeCache.txt
+CMakeFiles
 CMakeScripts
 Testing
 Makefile
