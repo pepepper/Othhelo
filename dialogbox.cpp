@@ -2,6 +2,9 @@
 #include <string>
 
 dialogbox::dialogbox() {}
+dialogbox::~dialogbox() {}
+
+#ifdef Linux_System
 
 int dialogbox::QuitinGameDialogbox() {
 	boxer::Selection selection;
@@ -20,5 +23,28 @@ int dialogbox::EndGameDialogBox(int black, int white, int turn) {
 	return 1;
 }
 
-dialogbox::~dialogbox() {}
+#else
 
+int dialogbox::QuitinGameDialogbox() {
+	int ret;
+	SDL_ShowMessageBox(&QuitinGameDialogDatas, &ret);
+	return ret;
+}
+
+int dialogbox::EndGameDialogBox(int black, int white, int turn) {
+	std::string str = u8"黒:" + std::to_string(black) + u8"\n白:" + std::to_string(white) + u8"\n総ターン数:" + std::to_string(turn);
+	SDL_MessageBoxData EndGameDialogDatas = {
+		SDL_MESSAGEBOX_WARNING, /* .flags */
+		NULL, /* .window */
+		u8"ゲーム終了", /* .title */
+		str.c_str(), /* .message */
+		1, /* .numbuttons */
+		&EndDialogButtons, /* .buttons */
+		NULL /* .colorScheme */
+	};
+	int ret;
+	SDL_ShowMessageBox(&EndGameDialogDatas, &ret);
+	return ret;
+}
+
+#endif
