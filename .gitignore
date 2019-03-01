@@ -15,4 +15,6 @@ CTestTestfile.cmake
 othello
 SDL2-2.0.8
 SDL2_net-2.0.1
+*.exe
+*.dll
 # End of https://www.gitignore.io/api/cmake
