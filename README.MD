@@ -1,12 +1,13 @@
 # Othhelo
 This is not othello, is this?  
-
+終了判定が若干おかしいかも
 # ビルド
 Windowsの時はSDLの公式サイトからDevelopment Librariesをダウンロードして  
 プロジェクトのルートフォルダにおいてください  
-現在のコミットではSDL2-2.0.8が必要ですが CMakeLists.txtにあるSDL2-2.0.8を書き換えることによって  
+現在のコミットではSDL2-2.0.8が必要ですが  
+VSのソリューションのライブラリパス/インクルードパスにあるSDL2-2.0.8を書き換えることによって  
 別のバージョンのSDL2でも使用できます  
-VisualStudio等でcppファイルをプロジェクトに追加しビルドしてください  
+VisualStudio2017でプロジェクトをビルドしてください  
   
 Linuxでは"Boxer"を使用しているため、cloneするときは  
 `git clone --recursive https://github.com/pepepper/Othhelo.git`  
