@@ -10,7 +10,7 @@
 int main(int argc, char *argv[]) {
 	std::string ip, port, user, pass, arg;
 	SDL_Event e;
-	int x, y, mode = -1, netmode, first;
+	int x, y, mode = -1, netmode;
 	std::unique_ptr<Game> game;
 
 	std::cout << "モードを選択してください" << std::endl << "0:オフラインで交互にプレイする 1:オンラインでプレイする場合 :";
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 		}
 		std::cout << "正しい数値を入力してくだせえ" << std::endl;
 	} while (1);
-	/*
+	/*先に部屋立てた方が先手
 		for (int i = 1; i < argc; i++) {
 			if (!strcmp(argv[i], "-ip"))
 				ip = argv[i += 1];
@@ -64,8 +64,6 @@ int main(int argc, char *argv[]) {
 				user = argv[i += 1];
 			if (!strcmp(argv[i], "-h"))
 				netmode = 0;
-			if (!strcmp(argv[i], "-p"))
-				first = 1;
 			if (!strcmp(argv[i], "-g"))
 				netmode = 1;
 			if (!strcmp(argv[i], "-pass"))
