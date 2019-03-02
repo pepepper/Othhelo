@@ -6,7 +6,6 @@ Windowsの時はSDLの公式サイトからDevelopment Librariesをダウンロ�
 プロジェクトのルートフォルダにおいてください  
 現在のコミットではSDL2-2.0.8が必要ですが CMakeLists.txtにあるSDL2-2.0.8を書き換えることによって  
 別のバージョンのSDL2でも使用できます  
-msys2などを用いてCMakeするか(cmake -G "MSYS Makefiles" ./)  
 VisualStudio等でcppファイルをプロジェクトに追加しビルドしてください  
   
 Linuxでは"Boxer"を使用しているため、cloneするときは  
