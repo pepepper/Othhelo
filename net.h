@@ -6,12 +6,12 @@ class Net
   public:
 	Net();
 	~Net();
-	int connnect(std::string host);
+	int connect(std::string host);
 	int put(int x,int y);
-	std::tuple<int,int> get();
+	std::tuple<const char*,int,int> get();
 	int myturn;//0:black is my turn
   private:
-	IPAddress address;
+	IPaddress server;
 	TCPsocket connection;
 	SDLNet_SocketSet sockets;
-}
+};

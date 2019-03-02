@@ -8,7 +8,7 @@ void SDL_RenderCopyBynum(SDL_Renderer *renderer, SDL_Texture *tex, int x, int y,
 Graphic::Graphic() {
 	SDL_Surface *temp;
 
-	SDL_CreateWindowAndRenderer(768, 768, SDL_WINDOW_BORDERLESS, &window, &renderer);
+	SDL_CreateWindowAndRenderer(768, 768, NULL, &window, &renderer);
 	temp = SDL_LoadBMP("./icon.bmp");
 	SDL_SetWindowIcon(window, temp);
 	SDL_FreeSurface(temp);

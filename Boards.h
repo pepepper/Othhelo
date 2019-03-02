@@ -8,7 +8,8 @@ class Boards {
 	bool isPutable(int x, int y, int deltax, int deltay, int turn);
 	bool isPutable(int x, int y, int turn);
 	bool Put(int x, int y, int turn);
-	bool isFull();
+	bool isFull(int turn);
+	bool isSkipable(int turn);
 	std::vector<std::vector<int>> delta;
 	std::pair<int, int> Count();
 	std::vector<std::vector<int>> board;

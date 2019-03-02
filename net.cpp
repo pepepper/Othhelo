@@ -1,4 +1,7 @@
 ﻿#include "net.h"
+#include<vector>
+#include<sstream>
+#include <functional>
 Net::Net()
 {
 	SDLNet_Init();
@@ -15,8 +18,8 @@ Net::~Net()
 
 int Net::connect(std::string ip)
 {
-	SDLNet_ResolveHost(&address, ip.c_str(), 45451);
-	connection = SDLNet_TCP_Open(&address);
+	SDLNet_ResolveHost(&server, ip.c_str(), 45451);
+	connection = SDLNet_TCP_Open(&server);
 	if (!connection)
 		return -1;
 	SDLNet_TCP_AddSocket(sockets, connection);
@@ -33,7 +36,7 @@ int Net::put(int x, int y)
 	return 0;
 }
 
-std::tuple<std::string,int, int> Net::get()
+std::tuple<const char*, int, int> Net::get()
 {
 	char data;
 	std::string ret;
@@ -43,11 +46,11 @@ std::tuple<std::string,int, int> Net::get()
 		ret += data;
 	}
 	std::vector<std::string> parsed;
-	std::stringstream stream{ret};
+	std::stringstream stream{ ret };
 	std::string buf;
 	while (std::getline(stream, buf, ' '))
 	{
 		parsed.push_back(buf);
 	}
-	return std::pair<std::string,int,int>{parsed[0],std::stoi(parsed[1],std::stoi(parsed[2]))};
+	return std::make_tuple(parsed[0].c_str(), std::stoi(parsed[1]), std::stoi(parsed[2]));
 }

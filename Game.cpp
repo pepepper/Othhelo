@@ -29,12 +29,12 @@ bool Game::put(int x, int y) {
 	if (board->Put(temp1, temp2, turn)) {
 		turn *= -1;
 		howturn++;
-		full = board->isFull();
+		full = board->isFull(turn);
 		std::pair<int, int> koma(board->Count());
 		w = koma.first;
 		b = koma.second;
-		if (w == 0 || b == 0)full = true;
 		canPass();
+		if (w == 0 || b == 0)full = true;
 		return true;
 	}
 	return false;

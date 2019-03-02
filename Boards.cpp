@@ -137,13 +137,19 @@ void Boards::noCheckPut(int x, int y, int turn) {
 	delta[i][2] = y - yoffset;
 }
 
-bool Boards::isFull() {
-	for (int x = xoffset; x < boardx - xoffset; x++) {
-		for (int y = yoffset; y < boardy - yoffset; y++) {
-			if (board[x][y] == 0)return false;
+bool Boards::isFull(int turn) {
+	for (int x = 0; x < boardx; x++) {
+		for (int y = 0; y < boardy; y++) {
+			if (board[x][y] == 0)
+				if(isPutable(x,y,turn))return false;
 		}
 	}
 	return true;
+}
+
+bool Boards::isSkipable(int turn)
+{
+	return false;
 }
 
 std::pair<int, int> Boards::Count() {
