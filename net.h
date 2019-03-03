@@ -6,9 +6,11 @@ class Net{
 	Net();
 	~Net();
 	int connect(std::string host);
-	int login(std::string room, std::string pass);
-	int login(std::string room);
+	std::tuple<int, int> login(int room, std::string pass);
+	std::tuple<int, int> login(int room);
 	int makeroom();
+	int setpassword(std::string pass);
+	int setboardsize(int x, int y);
 	int put(int x, int y);
 	std::tuple<const char*, int, int> get();
 	int myturn;//0:black is my turn

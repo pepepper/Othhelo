@@ -10,6 +10,4 @@ class Game{
 	Boards *board;
 	bool full = false;
 	int howturn, b, w, turn;
-	private:
-	int boardx, boardy;
 };

@@ -23,39 +23,59 @@ int Net::connect(std::string ip){
 	return 0;
 }
 
-int Net::login(std::string room){
-	std::string request = "LOGIN " + room;
+std::tuple<int, int> Net::login(int room){
+	std::string request = "LOGIN " + std::to_string(room);
 	char data;
 	std::string reply;
 	int result, length = request.length();
 	SDLNet_TCP_Send(connection, request.c_str(), length);
 	if(length > result)
-		return -1;
+		return std::make_tuple<int, int>(-1, -1);
 	while(SDLNet_CheckSockets(sockets, 500) == 1){
 		SDLNet_TCP_Recv(connection, &data, 1);
 		reply += data;
 	}
-	if(!reply.compare("SUCCESS"))	return 0;
-	return -1;
+	std::stringstream stream(reply);
+	std::string temp;
+	std::vector<std::string> replys;
+	while(std::getline(stream, temp)){
+		if(!temp.empty()){
+			replys.push_back(temp);
+		}
+	}
+	if(!replys[0].compare("SUCCESS")){
+		return std::make_tuple<int, int>(std::stoi(replys[1]), std::stoi(replys[2]));
+	}
+	return std::make_tuple<int, int>(-1, -1);
 }
 
-int Net::login(std::string room, std::string pass){
-	std::string request = "LOGIN " + room + "\r\nPASSWORD" + pass;
+std::tuple<int, int> Net::login(int room, std::string pass){
+	std::string request = "LOGIN " + std::to_string(room) + "\r\nPASSWORD" + pass;
 	char data;
 	std::string reply;
 	int result, length = request.length();
 	SDLNet_TCP_Send(connection, request.c_str(), length);
 	if(length > result)
-		return -1;
+		return std::make_tuple<int, int>(-1, -1);
 	while(SDLNet_CheckSockets(sockets, 500) == 1){
 		SDLNet_TCP_Recv(connection, &data, 1);
 		reply += data;
 	}
-	if(!reply.compare("SUCCESS"))	return 0;
-	return -1;
+	std::stringstream stream(reply);
+	std::string temp;
+	std::vector<std::string> replys;
+	while(std::getline(stream, temp)){
+		if(!temp.empty()){
+			replys.push_back(temp);
+		}
+	}
+	if(!replys[0].compare("SUCCESS")){
+		return std::make_tuple<int, int>(std::stoi(replys[1]), std::stoi(replys[2]));
+	}
+	return std::make_tuple<int, int>(-1, -1);
 }
 
-int Net:: makeroom(){
+int Net::makeroom(){
 	std::string request = "ROOM";
 	char data;
 	std::string reply;
@@ -78,6 +98,38 @@ int Net:: makeroom(){
 	if(!replys[0].compare("SUCCESS")){
 		return std::stoi(replys[1]);
 	}
+	return -1;
+}
+
+int Net::setpassword(std::string pass){
+	std::string request = "SETPASSWORD" + pass;
+	char data;
+	std::string reply;
+	int result, length = request.length();
+	SDLNet_TCP_Send(connection, request.c_str(), length);
+	if(length > result)
+		return -1;
+	while(SDLNet_CheckSockets(sockets, 500) == 1){
+		SDLNet_TCP_Recv(connection, &data, 1);
+		reply += data;
+	}
+	if(!reply.compare("SUCCESS"))return 0;
+	return -1;
+}
+
+int Net::setboardsize(int x, int y){
+	std::string request = "SETBOARD" + std::to_string(x)+std::to_string(y);
+	char data;
+	std::string reply;
+	int result, length = request.length();
+	SDLNet_TCP_Send(connection, request.c_str(), length);
+	if(length > result)
+		return -1;
+	while(SDLNet_CheckSockets(sockets, 500) == 1){
+		SDLNet_TCP_Recv(connection, &data, 1);
+		reply += data;
+	}
+	if(!reply.compare("SUCCESS"))return 0;
 	return -1;
 }
 
