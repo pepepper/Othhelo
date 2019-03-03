@@ -1,16 +1,18 @@
 ﻿#include <SDL_net.h>
 #include <string>
 #include <utility>
-class Net
-{
-  public:
+class Net{
+	public:
 	Net();
 	~Net();
 	int connect(std::string host);
-	int put(int x,int y);
-	std::tuple<const char*,int,int> get();
+	int login(std::string room, std::string pass);
+	int login(std::string room);
+	int makeroom();
+	int put(int x, int y);
+	std::tuple<const char*, int, int> get();
 	int myturn;//0:black is my turn
-  private:
+	private:
 	IPaddress server;
 	TCPsocket connection;
 	SDLNet_SocketSet sockets;

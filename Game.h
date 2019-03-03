@@ -1,6 +1,6 @@
 #pragma once
 #include "Boards.h"
-class Game {
+class Game{
 	public:
 	Game();
 	Game(int x, int y);

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <vector>
 #include <utility>
-class Boards {
+class Boards{
 	public:
 	Boards(int x, int y);
 	~Boards();

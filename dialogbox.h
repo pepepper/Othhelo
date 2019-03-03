@@ -3,11 +3,11 @@
 #ifdef Linux_System
 #include "Boxer/include/boxer/boxer.h"
 
-class dialogbox {
+class dialogbox{
 	public:
 	dialogbox();
 	int QuitinGameDialogbox();
-	int EndGameDialogBox(int black, int white,int turn);
+	int EndGameDialogBox(int black, int white, int turn);
 	~dialogbox();
 
 };
@@ -15,20 +15,20 @@ class dialogbox {
 #else
 #include <SDL.h>
 
-class dialogbox {
+class dialogbox{
 	public:
 	dialogbox();
 	int QuitinGameDialogbox();
-	int EndGameDialogBox(int black, int white,int turn);
+	int EndGameDialogBox(int black, int white, int turn);
 	~dialogbox();
 
 	private:
 	const SDL_MessageBoxButtonData QuitDialogButtons[2] = {
-		{0, 0, u8"いいえ"	},
-		{0, 1, u8"はい"},
+		{0, 0, u8"いいえ"},
+	{0, 1, u8"はい"},
 	};
 
-	const SDL_MessageBoxButtonData EndDialogButtons = 	{0, 0, u8"OK"};
+	const SDL_MessageBoxButtonData EndDialogButtons = {0, 0, u8"OK"};
 
 	const SDL_MessageBoxData QuitinGameDialogDatas = {
 		SDL_MESSAGEBOX_WARNING, /* .flags */
