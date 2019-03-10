@@ -6,10 +6,10 @@
 Net::Net():closed(0){}
 
 Net::~Net(){
-	closesocket(sock);
+	close(sock);
 }
 #else
-Net::Net():closed(0){
+Net::Net():closed(0), ready(0){
 	WSADATA wsaData;
 	WSAStartup(2, &wsaData);
 }
@@ -44,7 +44,7 @@ std::tuple<int, int> Net::login(int room){
 	std::stringstream stream(reply);
 	std::string temp;
 	std::vector<std::string> replys;
-	while(std::getline(stream, temp)){
+	while(std::getline(stream, temp, ' ')){
 		if(!temp.empty()){
 			replys.push_back(temp);
 		}
@@ -70,7 +70,7 @@ std::tuple<int, int> Net::login(int room, std::string pass){
 	std::stringstream stream(reply);
 	std::string temp;
 	std::vector<std::string> replys;
-	while(std::getline(stream, temp)){
+	while(std::getline(stream, temp, ' ')){
 		if(!temp.empty()){
 			replys.push_back(temp);
 		}
@@ -96,7 +96,7 @@ int Net::makeroom(){
 	std::stringstream stream(reply);
 	std::string temp;
 	std::vector<std::string> replys;
-	while(std::getline(stream, temp)){
+	while(std::getline(stream, temp, ' ')){
 		if(!temp.empty()){
 			replys.push_back(temp);
 		}
@@ -192,7 +192,10 @@ std::tuple<const char*, int, int> Net::get(){
 		}
 		val = 0;
 		ioctl(sock, FIONBIO, &val);
-		return std::make_tuple(parsed[0].c_str(), std::stoi(parsed[1]), std::stoi(parsed[2]));
+		if(parsed.size() == 3)
+			return std::make_tuple(parsed[0].c_str(), std::stoi(parsed[1]), std::stoi(parsed[2]));
+		else
+			return std::make_tuple(parsed[0].c_str(), -1, -1);
 	}
 }
 #else
@@ -227,7 +230,10 @@ std::tuple<const char*, int, int> Net::get(){
 		}
 		val = 0;
 		ioctlsocket(sock, FIONBIO, &val);
-		return std::make_tuple(parsed[0].c_str(), std::stoi(parsed[1]), std::stoi(parsed[2]));
+		if(parsed.size() == 3)
+			return std::make_tuple(parsed[0].c_str(), std::stoi(parsed[1]), std::stoi(parsed[2]));
+		else
+			return std::make_tuple(parsed[0].c_str(), -1, -1);
 	}
 }
 #endif // Linux_System

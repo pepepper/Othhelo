@@ -101,6 +101,7 @@ int main(int argc, char *argv[]){
 	graphic.Put(game->board->delta);
 	graphic.changeturn(game->turn);
 	graphic.update();
+	if(mode == 1)graphic.netwait();
 	while(true){
 		while(SDL_WaitEvent(&e)){
 			switch(e.type){
@@ -115,7 +116,7 @@ int main(int argc, char *argv[]){
 				case SDL_MOUSEBUTTONUP:
 					x = (int)(e.button.x / 48);
 					y = (int)(e.button.y / 48);
-					if(mode == 0 || (netmode == game->turn)){
+					if(mode == 0 || (netmode == game->turn&&net->ready)){
 						if(freeput == 0){
 							if(game->put(x, y)){
 								if(mode == 1)net->put(x, y);
@@ -151,12 +152,28 @@ int main(int argc, char *argv[]){
 			net->closed = 0;
 			graphic.end();
 		}
-		if(netmode != game->turn){
-			std::tuple<std::string,int,int> action=net->get();
-			if(!std::get<0>(action).compare("nodata"));
-			else if(!std::get<0>(action).compare("PUT"));
-			else if(!std::get<0>(action).compare("FREEPUT"));
-			else if(!std::get<0>(action).compare("CLOSED"));
+		if(netmode != game->turn || !net->ready){
+			std::tuple<std::string, int, int> action = net->get();
+			if(!std::get<0>(action).compare("nodata"))continue;
+			else if(!std::get<0>(action).compare("PUT")){
+				game->put(std::get<1>(action), std::get<2>(action));
+				graphic.Put(game->board->delta);
+				graphic.changeturn(game->turn);
+				graphic.update();
+			} else if(!std::get<0>(action).compare("FREEPUT")){
+				game->put(std::get<1>(action), std::get<2>(action), freeput);
+				graphic.Put(game->board->delta);
+				graphic.changeturn(game->turn);
+				graphic.update();
+			} else if(!std::get<0>(action).compare("CLOSED")){
+				net->closed = 1;
+			} else if(!std::get<0>(action).compare("READY")){
+				net->ready = 1;
+			}
+		}
+		if(mode == 1 && net->ready && !net->started){
+			graphic.changeturn(game->turn);
+			net->started = 1;
 		}
 	}
 	return 0;

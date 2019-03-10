@@ -9,6 +9,7 @@ class Graphic{
 	void update();
 	void changeturn(int turn);
 	void end();
+	void netwait();
 	~Graphic();
 	private:
 	SDL_Window *window;

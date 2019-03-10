@@ -23,7 +23,7 @@ class Net{
 	int put(int x, int y);
 	int freeput(int x, int y);
 	std::tuple<const char*, int, int> get();
-	int closed;
+	int closed,ready,started;
 	private:
 	struct hostent *host;
 	struct sockaddr_in server;

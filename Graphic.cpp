@@ -73,3 +73,7 @@ void Graphic::changeturn(int turn){
 void Graphic::end(){
 	SDL_SetWindowTitle(window, u8"オセロ?:ゲーム終了");
 }
+
+void Graphic::netwait(){
+	SDL_SetWindowTitle(window, u8"オセロ?:対戦相手待ち");
+}
