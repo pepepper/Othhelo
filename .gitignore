@@ -18,6 +18,7 @@ SDL2_net-2.0.1
 *.exe
 *.dll
 *.vcxproj.*
+*.sln
 .vs/
 x64/
 # End of https://www.gitignore.io/api/cmake
