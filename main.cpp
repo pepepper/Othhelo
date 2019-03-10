@@ -16,6 +16,13 @@ int intGetOption(const char *message){
 	return std::stoi(temp);
 }
 
+long long llGetOption(const char *message){
+	std::string temp;
+	std::cout << message;
+	std::cin >> temp;
+	return std::stoll(temp);
+}
+
 std::string strGetOption(const char *message){
 	std::string temp;
 	std::cout << message;
@@ -25,6 +32,7 @@ std::string strGetOption(const char *message){
 
 int main(int argc, char *argv[]){
 	std::string ip, pass, arg;
+	long long room;
 	SDL_Event e;
 	int x, y, mode = -1, netmode = -1, netret, freeput = 0;
 	std::unique_ptr<Game> game;
@@ -44,49 +52,54 @@ int main(int argc, char *argv[]){
 				game.reset(new Game(x, y));
 			}
 		} else if(mode == 1){
-			net.reset();
+			net.reset(new Net());
 			ip = strGetOption("サーバーのIPアドレスまたはドメインを入力してください:");
 			netret = net->makeconnect(ip);
-			if(netret == -1){
+			if(netret){
 				std::cout << "通信エラー:終了します" << std::endl;
 				return 1;
 			}
 			netmode = intGetOption("モードを選択してください\n0:ホストとして部屋を立てる 1:ゲストとして部屋に入る :");
 			if(netmode != 0 && netmode != 1)throw std::invalid_argument("");
 			else if(netmode == 0){
-				netret = net->makeroom();
+				netmode = -1;
 				if(netret == -1){
 					std::cout << "通信エラー:終了します" << std::endl;
 					return 1;
 				}
-				std::cout << "部屋番号:" + netret;
-				std::cout << "パスワードを設定しますか?" << std::endl << "0:設定しない 1:設定する :";
-				std::cin >> arg;
-				if(!arg.compare("1")){
-					pass = strGetOption("パスワードを入力してください:");
-				}
-				if(intGetOption("盤面サイズを指定しますか?\n0:指定しない 1:指定する :") == 0) game.reset(new Game());
-				else{
+				if(intGetOption("盤面サイズを指定しますか?\n0:指定しない 1:指定する :") == 0){
+					game.reset(new Game());
+					room = net->makeroom(game->board->boardx, game->board->boardy);
+				} else{
 					std::string sx, sy;
 					int x, y;
 					x = intGetOption("8以下で縦のサイズを入力してください(盤面は入力された数値の倍のサイズになります):");
 					y = intGetOption("8以下で横のサイズを入力してください(盤面は入力された数値の倍のサイズになります):");
 					if(x > 8 || y > 8)throw std::invalid_argument("");
 					game.reset(new Game(x, y));
+					room = net->makeroom(x, y);
 				}
-			} else if(netmode == 1){
-				std::tuple<int, int> size;
-				netret = intGetOption("部屋番号を入力してください:");
-				std::cout << "パスワードが設定されていますか?" << std::endl << "0:設定されている 1:設定されていない :";
+				std::cout << "パスワードを設定しますか?" << std::endl << "0:設定しない 1:設定する :";
 				std::cin >> arg;
-				if(arg.compare("1") && arg.compare("1"))throw std::invalid_argument("");
+				if(!arg.compare("1")){
+					pass = strGetOption("パスワードを入力してください:");
+					net->setpassword(pass);
+				}
+				std::cout << "部屋番号:" + std::to_string(room);
+			} else if(netmode == 1){
+				netmode = 1;
+				std::tuple<int, int> size;
+				room = llGetOption("部屋番号を入力してください:");
+				std::cout << "パスワードが設定されていますか?" << std::endl << "0:設定されていない 1:設定されている :";
+				std::cin >> arg;
+				if(arg.compare("0") && arg.compare("1"))throw std::invalid_argument("");
 				else if(!arg.compare("1")){
 					pass = strGetOption("パスワードを入力してください:");
-					size = net->login(netret, pass);
+					size = net->login(room, pass);
 				} else{
-					size = net->login(netret);
+					size = net->login(room);
 				}
-				game.reset(new Game(std::get<0>(size), std::get<1>(size)));
+				game.reset(new Game(std::get<0>(size)/2, std::get<1>(size)/2));
 			}
 		}
 	} catch(const std::invalid_argument& e){
@@ -146,34 +159,33 @@ int main(int argc, char *argv[]){
 					}
 					break;
 			}
-		}
-		if(net->closed){
-			dialog.ConnectionclosedDialogBox();
-			net->closed = 0;
-			graphic.end();
-		}
-		if(netmode != game->turn || !net->ready){
-			std::tuple<std::string, int, int> action = net->get();
-			if(!std::get<0>(action).compare("nodata"))continue;
-			else if(!std::get<0>(action).compare("PUT")){
-				game->put(std::get<1>(action), std::get<2>(action));
-				graphic.Put(game->board->delta);
-				graphic.changeturn(game->turn);
-				graphic.update();
-			} else if(!std::get<0>(action).compare("FREEPUT")){
-				game->put(std::get<1>(action), std::get<2>(action), freeput);
-				graphic.Put(game->board->delta);
-				graphic.changeturn(game->turn);
-				graphic.update();
-			} else if(!std::get<0>(action).compare("CLOSED")){
-				net->closed = 1;
-			} else if(!std::get<0>(action).compare("READY")){
-				net->ready = 1;
+			if(net->closed){
+				dialog.ConnectionclosedDialogBox();
+				net->closed = 0;
+				graphic.end();
 			}
-		}
-		if(mode == 1 && net->ready && !net->started){
-			graphic.changeturn(game->turn);
-			net->started = 1;
+			if((netmode != game->turn || !net->ready)&&!net->closed){
+				std::tuple<std::string, int, int> action = net->get();
+				if(!std::get<0>(action).compare("nodata"))
+					continue;
+				else if(!std::get<0>(action).compare("PUT")){
+					game->put(std::get<1>(action), std::get<2>(action));
+					graphic.Put(game->board->delta);
+					graphic.changeturn(game->turn);
+					graphic.update();
+				} else if(!std::get<0>(action).compare("FREEPUT")){
+					game->put(std::get<1>(action), std::get<2>(action), freeput);
+					graphic.Put(game->board->delta);
+					graphic.changeturn(game->turn);
+					graphic.update();
+				} else if(!std::get<0>(action).compare("CLOSED")){
+					net->closed = 1;
+				} else if(!std::get<0>(action).compare("READY")){
+					graphic.changeturn(game->turn);
+					net->started = 1;
+					net->ready = 1;
+				}
+			}
 		}
 	}
 	return 0;

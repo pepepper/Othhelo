@@ -15,14 +15,13 @@ class Net{
 	Net();
 	~Net();
 	int makeconnect(std::string host);
-	std::tuple<int, int> login(int room, std::string pass);
-	std::tuple<int, int> login(int room);
-	int makeroom();
+	std::tuple<int, int> login(long long room, std::string pass);
+	std::tuple<int, int> login(long long room);
+	long long makeroom(int x,int y);
 	int setpassword(std::string pass);
-	int setboardsize(int x, int y);
 	int put(int x, int y);
 	int freeput(int x, int y);
-	std::tuple<const char*, int, int> get();
+	std::tuple<std::string, int, int> get();
 	int closed,ready,started;
 	private:
 	struct hostent *host;

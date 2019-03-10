@@ -1,5 +1,4 @@
 ﻿#include "Boards.h"
-//todo コマ操作見直し
 Boards::Boards(int x, int y): delta(40, std::vector<int>(3, 0)){
 	boardx = x;
 	boardy = y;

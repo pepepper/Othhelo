@@ -56,8 +56,8 @@ bool Game::put(int x, int y, int freeput){
 }
 
 void Game::canPass(){
-	for(int x = 0; x < board->boardx; x++){
-		for(int y = 0; y < board->boardy; y++){
+	for(int x = 0; x < 16; x++){
+		for(int y = 0; y < 16; y++){
 			if(board->isPutable(x, y, turn))return;
 		}
 	}

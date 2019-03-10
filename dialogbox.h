@@ -47,7 +47,7 @@ class dialogbox{
 		NULL, /* .window */
 		u8"通知", /* .title */
 		u8"接続が切断されました", /* .message */
-		SDL_arraysize(EndDialogButtons), /* .numbuttons */
+		1, /* .numbuttons */
 		&EndDialogButtons, /* .buttons */
 		NULL /* .colorScheme */
 	};

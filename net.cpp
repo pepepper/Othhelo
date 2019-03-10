@@ -2,6 +2,7 @@
 #include<vector>
 #include<sstream>
 #include <functional>
+#include <iostream>
 #ifdef Linux_System
 Net::Net():closed(0){}
 
@@ -15,6 +16,8 @@ Net::Net():closed(0), ready(0){
 }
 
 Net::~Net(){
+	std::string req = "CLOSED";
+	send(sock, req.c_str(), req.length(), 0);
 	closesocket(sock);
 	WSACleanup();
 }
@@ -22,25 +25,25 @@ Net::~Net(){
 int Net::makeconnect(std::string ip){
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 	server.sin_family = AF_INET;
-	server.sin_port = htons(12345);
+	server.sin_port = htons(45451);
 	host = gethostbyname(ip.c_str());
 	if(host == NULL)	return -1;
 	server.sin_addr.S_un.S_addr = *(unsigned int *)host->h_addr_list[0];
-	connect(sock, (struct sockaddr *)&server, sizeof(server));
-	return 0;
+	return connect(sock, (struct sockaddr *)&server, sizeof(server));
+
 }
 
-std::tuple<int, int> Net::login(int room){
+std::tuple<int, int> Net::login(long long room){
 	std::string request = "LOGIN " + std::to_string(room);
-	char data;
+	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length();
 	result = send(sock, request.c_str(), request.length(), 0);
 	if(length > result)
 		return std::make_tuple<int, int>(-1, -1);
-	while(recv(sock, &data, 1, 0)){
-		reply += data;
-	}
+	recv(sock, data, 32, 0);
+	reply += data;
+
 	std::stringstream stream(reply);
 	std::string temp;
 	std::vector<std::string> replys;
@@ -56,17 +59,16 @@ std::tuple<int, int> Net::login(int room){
 	return std::make_tuple<int, int>(-1, -1);
 }
 
-std::tuple<int, int> Net::login(int room, std::string pass){
+std::tuple<int, int> Net::login(long long room, std::string pass){
 	std::string request = "LOGIN " + std::to_string(room) + "\r\nPASSWORD" + pass;
-	char data;
+	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length();
 	result = send(sock, request.c_str(), request.length(), 0);
 	if(length > result)
 		return std::make_tuple<int, int>(-1, -1);
-	while(recv(sock, &data, 1, 0)){
-		reply += data;
-	}
+	recv(sock, data, 32, 0);
+	reply += data;
 	std::stringstream stream(reply);
 	std::string temp;
 	std::vector<std::string> replys;
@@ -82,17 +84,16 @@ std::tuple<int, int> Net::login(int room, std::string pass){
 	return std::make_tuple<int, int>(-1, -1);
 }
 
-int Net::makeroom(){
-	std::string request = "ROOM";
-	char data;
+long long Net::makeroom(int x, int y){
+	std::string request = "ROOM " + std::to_string(x) + " " + std::to_string(y);
+	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length();
 	result = send(sock, request.c_str(), request.length(), 0);
 	if(length > result)
 		return -1;
-	while(recv(sock, &data, 1, 0)){
-		reply += data;
-	}
+	recv(sock, data, 32, 0);
+	reply.assign(data);
 	std::stringstream stream(reply);
 	std::string temp;
 	std::vector<std::string> replys;
@@ -102,39 +103,22 @@ int Net::makeroom(){
 		}
 	}
 	if(!replys[0].compare("SUCCESS")){
-		return std::stoi(replys[1]);
+		return std::stoll(replys[1]);
 	}
 	closed = 1;
 	return -1;
 }
 
 int Net::setpassword(std::string pass){
-	std::string request = "SETPASSWORD" + pass;
-	char data;
+	std::string request = "SETPASSWORD " + pass;
+	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length();
 	result = send(sock, request.c_str(), request.length(), 0);
 	if(length > result)
 		return -1;
-	while(recv(sock, &data, 1, 0)){
-		reply += data;
-	}
-	if(!reply.compare("SUCCESS"))return 0;
-	closed = 1;
-	return -1;
-}
-
-int Net::setboardsize(int x, int y){
-	std::string request = "SETBOARD" + std::to_string(x) + std::to_string(y);
-	char data;
-	std::string reply;
-	int result, length = request.length();
-	result = send(sock, request.c_str(), request.length(), 0);
-	if(length > result)
-		return -1;
-	while(recv(sock, &data, 1, 0)){
-		reply += data;
-	}
+	recv(sock, data, 32, 0);
+	reply += data;
 	if(!reply.compare("SUCCESS"))return 0;
 	closed = 1;
 	return -1;
@@ -162,12 +146,12 @@ int Net::freeput(int x, int y){
 
 #ifdef Linux_System
 std::tuple<const char*, int, int> Net::get(){
-	char data;
+	char data[32] = {0};
 	std::string ret;
 	int n = 0;
 	u_long val = 1;
 	ioctl(sock, FIONBIO, &val);
-	n = recv(sock, &data, 1, 0);
+	n = recv(sock, data, 32, 0);
 	if(n < 1){
 		if(WSAGetLastError() == WSAEWOULDBLOCK){
 			val = 0;
@@ -181,9 +165,6 @@ std::tuple<const char*, int, int> Net::get(){
 		}
 	} else{
 		ret = data;
-		while(recv(sock, &data, 1, 0) > 0){
-			ret += data;
-		}
 		std::vector<std::string> parsed;
 		std::stringstream stream{ret};
 		std::string buf;
@@ -199,13 +180,13 @@ std::tuple<const char*, int, int> Net::get(){
 	}
 }
 #else
-std::tuple<const char*, int, int> Net::get(){
-	char data;
+std::tuple<std::string, int, int> Net::get(){
+	char data[32] = {0};
 	std::string ret;
 	int n = 0;
 	u_long val = 1;
 	ioctlsocket(sock, FIONBIO, &val);
-	n = recv(sock, &data, 1, 0);
+	n = recv(sock, data, 32, 0);
 	if(n < 1){
 		if(WSAGetLastError() == WSAEWOULDBLOCK){
 			val = 0;
@@ -217,24 +198,18 @@ std::tuple<const char*, int, int> Net::get(){
 			closed = 1;
 			return std::make_tuple("nodata", -1, -1);
 		}
-	} else{
-		ret = data;
-		while(recv(sock, &data, 1, 0) > 0){
-			ret += data;
-		}
-		std::vector<std::string> parsed;
-		std::stringstream stream{ret};
-		std::string buf;
-		while(std::getline(stream, buf, ' ')){
-			parsed.push_back(buf);
-		}
-		val = 0;
-		ioctlsocket(sock, FIONBIO, &val);
-		if(parsed.size() == 3)
-			return std::make_tuple(parsed[0].c_str(), std::stoi(parsed[1]), std::stoi(parsed[2]));
-		else
-			return std::make_tuple(parsed[0].c_str(), -1, -1);
 	}
+	ret = data;
+	std::vector<std::string> parsed;
+	std::stringstream stream{ret};
+	std::string buf;
+	while(std::getline(stream, buf, ' ')){
+		parsed.push_back(buf);
+	}
+	if(parsed.size() == 3)
+		return std::make_tuple(parsed[0], std::stoi(parsed[1]), std::stoi(parsed[2]));
+	else
+		return std::make_tuple(parsed[0], -1, -1);
 }
 #endif // Linux_System
 
