@@ -51,8 +51,8 @@ void Graphic::StartGame(){
 void Graphic::Put(std::vector<std::vector<int>> &delta){//[n][0] white/black [n][1] x [n][2] y
 	SDL_SetRenderTarget(renderer, tex);
 	for(int i = 0; delta[i][0] && i < 40; i++){
-		komarect.x = 132 * delta[i][1] + 526;
-		komarect.y = 132 * delta[i][2] + 526;
+		komarect.x = 132 * delta[i][1];
+		komarect.y = 132 * delta[i][2];
 		if(delta[i][0] == -1)SDL_RenderCopy(renderer, black, NULL, &komarect);
 		else if(delta[i][0] == 1)SDL_RenderCopy(renderer, white, NULL, &komarect);
 		delta[i][0] = delta[i][1] = delta[i][2] = 0;
@@ -68,4 +68,8 @@ void Graphic::update(){
 void Graphic::changeturn(int turn){
 	if(turn == 1)	SDL_SetWindowTitle(window, u8"オセロ?:白番です");
 	if(turn == -1)	SDL_SetWindowTitle(window, u8"オセロ?:黒番です");
+}
+
+void Graphic::end(){
+	SDL_SetWindowTitle(window, u8"オセロ?:ゲーム終了");
 }

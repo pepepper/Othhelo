@@ -8,6 +8,7 @@ class dialogbox{
 	dialogbox();
 	int QuitinGameDialogbox();
 	int EndGameDialogBox(int black, int white, int turn);
+	int ConnectionclosedDialogBox();
 	~dialogbox();
 
 };
@@ -20,6 +21,7 @@ class dialogbox{
 	dialogbox();
 	int QuitinGameDialogbox();
 	int EndGameDialogBox(int black, int white, int turn);
+	int ConnectionclosedDialogBox();
 	~dialogbox();
 
 	private:
@@ -40,5 +42,14 @@ class dialogbox{
 		NULL /* .colorScheme */
 	};
 
+	const SDL_MessageBoxData ConnectionClosedDialogDatas = {
+		SDL_MESSAGEBOX_WARNING, /* .flags */
+		NULL, /* .window */
+		u8"通知", /* .title */
+		u8"接続が切断されました", /* .message */
+		SDL_arraysize(EndDialogButtons), /* .numbuttons */
+		&EndDialogButtons, /* .buttons */
+		NULL /* .colorScheme */
+	};
 };
 #endif

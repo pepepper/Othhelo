@@ -2,24 +2,31 @@
 #include<vector>
 #include<sstream>
 #include <functional>
-Net::Net(){
-	SDLNet_Init();
-	sockets = SDLNet_AllocSocketSet(1);
+#ifdef Linux_System
+Net::Net():closed(0){}
+
+Net::~Net(){
+	closesocket(sock);
+}
+#else
+Net::Net():closed(0){
+	WSADATA wsaData;
+	WSAStartup(2, &wsaData);
 }
 
 Net::~Net(){
-	SDLNet_TCP_Close(connection);
-	SDLNet_TCP_DelSocket(sockets, connection);
-	SDLNet_FreeSocketSet(sockets);
-	SDLNet_Quit();
+	closesocket(sock);
+	WSACleanup();
 }
-
-int Net::connect(std::string ip){
-	SDLNet_ResolveHost(&server, ip.c_str(), 45451);
-	connection = SDLNet_TCP_Open(&server);
-	if(!connection)
-		return -1;
-	SDLNet_TCP_AddSocket(sockets, connection);
+#endif
+int Net::makeconnect(std::string ip){
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	server.sin_family = AF_INET;
+	server.sin_port = htons(12345);
+	host = gethostbyname(ip.c_str());
+	if(host == NULL)	return -1;
+	server.sin_addr.S_un.S_addr = *(unsigned int *)host->h_addr_list[0];
+	connect(sock, (struct sockaddr *)&server, sizeof(server));
 	return 0;
 }
 
@@ -28,11 +35,10 @@ std::tuple<int, int> Net::login(int room){
 	char data;
 	std::string reply;
 	int result, length = request.length();
-	SDLNet_TCP_Send(connection, request.c_str(), length);
+	result = send(sock, request.c_str(), request.length(), 0);
 	if(length > result)
 		return std::make_tuple<int, int>(-1, -1);
-	while(SDLNet_CheckSockets(sockets, 500) == 1){
-		SDLNet_TCP_Recv(connection, &data, 1);
+	while(recv(sock, &data, 1, 0)){
 		reply += data;
 	}
 	std::stringstream stream(reply);
@@ -46,6 +52,7 @@ std::tuple<int, int> Net::login(int room){
 	if(!replys[0].compare("SUCCESS")){
 		return std::make_tuple<int, int>(std::stoi(replys[1]), std::stoi(replys[2]));
 	}
+	closed = 1;
 	return std::make_tuple<int, int>(-1, -1);
 }
 
@@ -54,11 +61,10 @@ std::tuple<int, int> Net::login(int room, std::string pass){
 	char data;
 	std::string reply;
 	int result, length = request.length();
-	SDLNet_TCP_Send(connection, request.c_str(), length);
+	result = send(sock, request.c_str(), request.length(), 0);
 	if(length > result)
 		return std::make_tuple<int, int>(-1, -1);
-	while(SDLNet_CheckSockets(sockets, 500) == 1){
-		SDLNet_TCP_Recv(connection, &data, 1);
+	while(recv(sock, &data, 1, 0)){
 		reply += data;
 	}
 	std::stringstream stream(reply);
@@ -72,6 +78,7 @@ std::tuple<int, int> Net::login(int room, std::string pass){
 	if(!replys[0].compare("SUCCESS")){
 		return std::make_tuple<int, int>(std::stoi(replys[1]), std::stoi(replys[2]));
 	}
+	closed = 1;
 	return std::make_tuple<int, int>(-1, -1);
 }
 
@@ -80,11 +87,10 @@ int Net::makeroom(){
 	char data;
 	std::string reply;
 	int result, length = request.length();
-	SDLNet_TCP_Send(connection, request.c_str(), length);
+	result = send(sock, request.c_str(), request.length(), 0);
 	if(length > result)
 		return -1;
-	while(SDLNet_CheckSockets(sockets, 500) == 1){
-		SDLNet_TCP_Recv(connection, &data, 1);
+	while(recv(sock, &data, 1, 0)){
 		reply += data;
 	}
 	std::stringstream stream(reply);
@@ -98,6 +104,7 @@ int Net::makeroom(){
 	if(!replys[0].compare("SUCCESS")){
 		return std::stoi(replys[1]);
 	}
+	closed = 1;
 	return -1;
 }
 
@@ -106,54 +113,122 @@ int Net::setpassword(std::string pass){
 	char data;
 	std::string reply;
 	int result, length = request.length();
-	SDLNet_TCP_Send(connection, request.c_str(), length);
+	result = send(sock, request.c_str(), request.length(), 0);
 	if(length > result)
 		return -1;
-	while(SDLNet_CheckSockets(sockets, 500) == 1){
-		SDLNet_TCP_Recv(connection, &data, 1);
+	while(recv(sock, &data, 1, 0)){
 		reply += data;
 	}
 	if(!reply.compare("SUCCESS"))return 0;
+	closed = 1;
 	return -1;
 }
 
 int Net::setboardsize(int x, int y){
-	std::string request = "SETBOARD" + std::to_string(x)+std::to_string(y);
+	std::string request = "SETBOARD" + std::to_string(x) + std::to_string(y);
 	char data;
 	std::string reply;
 	int result, length = request.length();
-	SDLNet_TCP_Send(connection, request.c_str(), length);
+	result = send(sock, request.c_str(), request.length(), 0);
 	if(length > result)
 		return -1;
-	while(SDLNet_CheckSockets(sockets, 500) == 1){
-		SDLNet_TCP_Recv(connection, &data, 1);
+	while(recv(sock, &data, 1, 0)){
 		reply += data;
 	}
 	if(!reply.compare("SUCCESS"))return 0;
+	closed = 1;
 	return -1;
 }
 
 int Net::put(int x, int y){
 	std::string request = "PUT " + std::to_string(x) + " " + std::to_string(y);
 	int result, length = request.length();
-	SDLNet_TCP_Send(connection, request.c_str(), length);
+	result = send(sock, request.c_str(), request.length(), 0);
 	if(length > result)
 		return -1;
 	return 0;
 }
 
+int Net::freeput(int x, int y){
+	std::string request = "FREEPUT " + std::to_string(x) + " " + std::to_string(y);
+	int result, length = request.length();
+	result = send(sock, request.c_str(), request.length(), 0);
+	if(length > result){
+		closed = 1;
+		return -1;
+	}
+	return 0;
+}
+
+#ifdef Linux_System
 std::tuple<const char*, int, int> Net::get(){
 	char data;
 	std::string ret;
-	while(SDLNet_CheckSockets(sockets, 0) == 1){
-		SDLNet_TCP_Recv(connection, &data, 1);
-		ret += data;
+	int n = 0;
+	u_long val = 1;
+	ioctl(sock, FIONBIO, &val);
+	n = recv(sock, &data, 1, 0);
+	if(n < 1){
+		if(WSAGetLastError() == WSAEWOULDBLOCK){
+			val = 0;
+			ioctl(sock, FIONBIO, &val);
+			return std::make_tuple("nodata", -1, -1);
+		} else{
+			val = 0;
+			ioctl(sock, FIONBIO, &val);
+			closed = 1;
+			return std::make_tuple("nodata", -1, -1);
+		}
+	} else{
+		ret = data;
+		while(recv(sock, &data, 1, 0) > 0){
+			ret += data;
+		}
+		std::vector<std::string> parsed;
+		std::stringstream stream{ret};
+		std::string buf;
+		while(std::getline(stream, buf, ' ')){
+			parsed.push_back(buf);
+		}
+		val = 0;
+		ioctl(sock, FIONBIO, &val);
+		return std::make_tuple(parsed[0].c_str(), std::stoi(parsed[1]), std::stoi(parsed[2]));
 	}
-	std::vector<std::string> parsed;
-	std::stringstream stream{ret};
-	std::string buf;
-	while(std::getline(stream, buf, ' ')){
-		parsed.push_back(buf);
-	}
-	return std::make_tuple(parsed[0].c_str(), std::stoi(parsed[1]), std::stoi(parsed[2]));
 }
+#else
+std::tuple<const char*, int, int> Net::get(){
+	char data;
+	std::string ret;
+	int n = 0;
+	u_long val = 1;
+	ioctlsocket(sock, FIONBIO, &val);
+	n = recv(sock, &data, 1, 0);
+	if(n < 1){
+		if(WSAGetLastError() == WSAEWOULDBLOCK){
+			val = 0;
+			ioctlsocket(sock, FIONBIO, &val);
+			return std::make_tuple("nodata", -1, -1);
+		} else{
+			val = 0;
+			ioctlsocket(sock, FIONBIO, &val);
+			closed = 1;
+			return std::make_tuple("nodata", -1, -1);
+		}
+	} else{
+		ret = data;
+		while(recv(sock, &data, 1, 0) > 0){
+			ret += data;
+		}
+		std::vector<std::string> parsed;
+		std::stringstream stream{ret};
+		std::string buf;
+		while(std::getline(stream, buf, ' ')){
+			parsed.push_back(buf);
+		}
+		val = 0;
+		ioctlsocket(sock, FIONBIO, &val);
+		return std::make_tuple(parsed[0].c_str(), std::stoi(parsed[1]), std::stoi(parsed[2]));
+	}
+}
+#endif // Linux_System
+

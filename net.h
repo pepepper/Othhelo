@@ -1,21 +1,31 @@
-﻿#include <SDL_net.h>
-#include <string>
+﻿#include <string>
 #include <utility>
+
+#ifdef Linux_System
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+#else
+#include <winsock2.h>
+#endif // 
+
 class Net{
 	public:
 	Net();
 	~Net();
-	int connect(std::string host);
+	int makeconnect(std::string host);
 	std::tuple<int, int> login(int room, std::string pass);
 	std::tuple<int, int> login(int room);
 	int makeroom();
 	int setpassword(std::string pass);
 	int setboardsize(int x, int y);
 	int put(int x, int y);
+	int freeput(int x, int y);
 	std::tuple<const char*, int, int> get();
-	int myturn;//0:black is my turn
+	int closed;
 	private:
-	IPaddress server;
-	TCPsocket connection;
-	SDLNet_SocketSet sockets;
+	struct hostent *host;
+	struct sockaddr_in server;
+	SOCKET sock;
 };

@@ -23,6 +23,13 @@ int dialogbox::EndGameDialogBox(int black, int white, int turn){
 	return 1;
 }
 
+int dialogbox::ConnectionclosedDialogBox(){
+	std::string str = u8"接続が切断されました";
+	boxer::Selection selection;
+	boxer::show(str.c_str(), u8"通知", boxer::Style::Warning, boxer::Buttons::OK);
+	return 1;
+}
+
 #else
 
 int dialogbox::QuitinGameDialogbox(){
@@ -44,6 +51,12 @@ int dialogbox::EndGameDialogBox(int black, int white, int turn){
 	};
 	int ret;
 	SDL_ShowMessageBox(&EndGameDialogDatas, &ret);
+	return ret;
+}
+
+int dialogbox::ConnectionclosedDialogBox(){
+	int ret;
+	SDL_ShowMessageBox(&ConnectionClosedDialogDatas, &ret);
 	return ret;
 }
 
