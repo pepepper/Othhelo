@@ -8,7 +8,8 @@
 #include <iostream>
 #include <typeinfo>
 #include <tuple>
-
+#include <thread>
+//todo 接続確立前の鯖落ち
 int intGetOption(const char *message){
 	std::string temp;
 	std::cout << message;
@@ -37,11 +38,12 @@ int main(int argc, char *argv[]){
 	int x, y, mode = -1, netmode = -1, netret, freeput = 0;
 	std::unique_ptr<Game> game;
 	std::unique_ptr<Net> net;
+	std::thread netthread;
 	//部屋番号指定
 	try{
 		mode = intGetOption("モードを選択してください\n0:オフラインで交互にプレイする 1:オンラインでプレイする場合 :");
 		if(mode != 0 && mode != 1)throw std::invalid_argument("");
-		else if(mode == 0){
+		else if(mode == 0){//offline
 			if(intGetOption("盤面サイズを指定しますか?\n0:指定しない 1:指定する :") == 0) game.reset(new Game());
 			else{
 				std::string sx, sy;
@@ -51,7 +53,7 @@ int main(int argc, char *argv[]){
 				if(x > 8 || y > 8)throw std::invalid_argument("");
 				game.reset(new Game(x, y));
 			}
-		} else if(mode == 1){
+		} else if(mode == 1){//online
 			net.reset(new Net());
 			ip = strGetOption("サーバーのIPアドレスまたはドメインを入力してください:");
 			netret = net->makeconnect(ip);
@@ -61,7 +63,7 @@ int main(int argc, char *argv[]){
 			}
 			netmode = intGetOption("モードを選択してください\n0:ホストとして部屋を立てる 1:ゲストとして部屋に入る :");
 			if(netmode != 0 && netmode != 1)throw std::invalid_argument("");
-			else if(netmode == 0){
+			else if(netmode == 0){//host
 				netmode = -1;
 				if(netret == -1){
 					std::cout << "通信エラー:終了します" << std::endl;
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]){
 					net->setpassword(pass);
 				}
 				std::cout << "部屋番号:" + std::to_string(room);
-			} else if(netmode == 1){
+			} else if(netmode == 1){//guest
 				netmode = 1;
 				std::tuple<int, int> size;
 				room = llGetOption("部屋番号を入力してください:");
@@ -99,7 +101,11 @@ int main(int argc, char *argv[]){
 				} else{
 					size = net->login(room);
 				}
-				game.reset(new Game(std::get<0>(size)/2, std::get<1>(size)/2));
+				if(std::get<0>(size) == -1){
+					std::cout << "通信エラー:終了します" << std::endl;
+					return 1;
+				}
+				game.reset(new Game(std::get<0>(size), std::get<1>(size)));
 			}
 		}
 	} catch(const std::invalid_argument& e){
@@ -115,6 +121,30 @@ int main(int argc, char *argv[]){
 	graphic.changeturn(game->turn);
 	graphic.update();
 	if(mode == 1)graphic.netwait();
+	if(mode == 1)netthread = std::thread([&game, &net, &graphic, &freeput, &netmode]{
+		while(net->closed==0){
+			std::tuple<std::string, int, int> action = net->get();
+			if(!std::get<0>(action).compare("nodata")){
+				net->closed = 1;
+			} else if(!std::get<0>(action).compare("PUT") && netmode != game->turn){
+				game->put(std::get<1>(action), std::get<2>(action));
+				graphic.Put(game->board->delta);
+				graphic.changeturn(game->turn);
+				graphic.update();
+			} else if(!std::get<0>(action).compare("FREEPUT") && netmode != game->turn){
+				game->put(std::get<1>(action), std::get<2>(action), freeput);
+				graphic.Put(game->board->delta);
+				graphic.changeturn(game->turn);
+				graphic.update();
+			} else if(!std::get<0>(action).compare("CLOSED")){
+				net->closed = 1;
+			} else if(!std::get<0>(action).compare("READY")){
+				graphic.changeturn(game->turn);
+				net->started = 1;
+				net->ready = 1;
+			}
+		}
+										 });
 	while(true){
 		while(SDL_WaitEvent(&e)){
 			switch(e.type){
@@ -155,38 +185,22 @@ int main(int argc, char *argv[]){
 						game.release();
 						graphic.~Graphic();
 						SDL_Quit();
+						if(mode == 1){
+							net->close();
+							netthread.join();
+							net.release();
+						}
 						return 0;
 					}
 					break;
 			}
-			if(net->closed){
+			if(mode==1&&net->closed==1&&net->ready==1){
 				dialog.ConnectionclosedDialogBox();
-				net->closed = 0;
 				graphic.end();
-			}
-			if((netmode != game->turn || !net->ready)&&!net->closed){
-				std::tuple<std::string, int, int> action = net->get();
-				if(!std::get<0>(action).compare("nodata"))
-					continue;
-				else if(!std::get<0>(action).compare("PUT")){
-					game->put(std::get<1>(action), std::get<2>(action));
-					graphic.Put(game->board->delta);
-					graphic.changeturn(game->turn);
-					graphic.update();
-				} else if(!std::get<0>(action).compare("FREEPUT")){
-					game->put(std::get<1>(action), std::get<2>(action), freeput);
-					graphic.Put(game->board->delta);
-					graphic.changeturn(game->turn);
-					graphic.update();
-				} else if(!std::get<0>(action).compare("CLOSED")){
-					net->closed = 1;
-				} else if(!std::get<0>(action).compare("READY")){
-					graphic.changeturn(game->turn);
-					net->started = 1;
-					net->ready = 1;
-				}
+				net->ready = 0;
 			}
 		}
 	}
+	netthread.join();
 	return 0;
 }

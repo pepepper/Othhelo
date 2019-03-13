@@ -4,7 +4,7 @@
 #include <functional>
 #include <iostream>
 #ifdef Linux_System
-Net::Net():closed(0){}
+Net::Net():closed(0),ready(0){}
 
 Net::~Net(){
 	close(sock);
@@ -16,12 +16,17 @@ Net::Net():closed(0), ready(0){
 }
 
 Net::~Net(){
-	std::string req = "CLOSED";
-	send(sock, req.c_str(), req.length(), 0);
 	closesocket(sock);
 	WSACleanup();
 }
 #endif
+
+void Net::close(){
+	std::string request = "CLOSED";
+	send(sock, request.c_str(), request.size() + 1, 0);
+	closed = 1;
+}
+
 int Net::makeconnect(std::string ip){
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 	server.sin_family = AF_INET;
@@ -38,7 +43,8 @@ std::tuple<int, int> Net::login(long long room){
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length();
-	result = send(sock, request.c_str(), request.length(), 0);
+	result = send(sock, request.c_str(), request.size() + 1, 0);
+	
 	if(length > result)
 		return std::make_tuple<int, int>(-1, -1);
 	recv(sock, data, 32, 0);
@@ -60,11 +66,12 @@ std::tuple<int, int> Net::login(long long room){
 }
 
 std::tuple<int, int> Net::login(long long room, std::string pass){
-	std::string request = "LOGIN " + std::to_string(room) + "\r\nPASSWORD" + pass;
+	std::string request = "LOGIN " + std::to_string(room) + " PASSWORD " + pass;
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length();
-	result = send(sock, request.c_str(), request.length(), 0);
+	result = send(sock, request.c_str(), request.size() + 1, 0);
+	
 	if(length > result)
 		return std::make_tuple<int, int>(-1, -1);
 	recv(sock, data, 32, 0);
@@ -89,7 +96,7 @@ long long Net::makeroom(int x, int y){
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length();
-	result = send(sock, request.c_str(), request.length(), 0);
+	result = send(sock, request.c_str(), request.size() + 1, 0);
 	if(length > result)
 		return -1;
 	recv(sock, data, 32, 0);
@@ -114,7 +121,8 @@ int Net::setpassword(std::string pass){
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length();
-	result = send(sock, request.c_str(), request.length(), 0);
+	result = send(sock, request.c_str(), request.size() + 1, 0);
+	
 	if(length > result)
 		return -1;
 	recv(sock, data, 32, 0);
@@ -127,7 +135,8 @@ int Net::setpassword(std::string pass){
 int Net::put(int x, int y){
 	std::string request = "PUT " + std::to_string(x) + " " + std::to_string(y);
 	int result, length = request.length();
-	result = send(sock, request.c_str(), request.length(), 0);
+	result = send(sock, request.c_str(), request.size() + 1, 0);
+	
 	if(length > result)
 		return -1;
 	return 0;
@@ -136,7 +145,8 @@ int Net::put(int x, int y){
 int Net::freeput(int x, int y){
 	std::string request = "FREEPUT " + std::to_string(x) + " " + std::to_string(y);
 	int result, length = request.length();
-	result = send(sock, request.c_str(), request.length(), 0);
+	result = send(sock, request.c_str(), request.size() + 1, 0);
+	
 	if(length > result){
 		closed = 1;
 		return -1;
@@ -144,62 +154,16 @@ int Net::freeput(int x, int y){
 	return 0;
 }
 
-#ifdef Linux_System
-std::tuple<const char*, int, int> Net::get(){
-	char data[32] = {0};
-	std::string ret;
-	int n = 0;
-	u_long val = 1;
-	ioctl(sock, FIONBIO, &val);
-	n = recv(sock, data, 32, 0);
-	if(n < 1){
-		if(WSAGetLastError() == WSAEWOULDBLOCK){
-			val = 0;
-			ioctl(sock, FIONBIO, &val);
-			return std::make_tuple("nodata", -1, -1);
-		} else{
-			val = 0;
-			ioctl(sock, FIONBIO, &val);
-			closed = 1;
-			return std::make_tuple("nodata", -1, -1);
-		}
-	} else{
-		ret = data;
-		std::vector<std::string> parsed;
-		std::stringstream stream{ret};
-		std::string buf;
-		while(std::getline(stream, buf, ' ')){
-			parsed.push_back(buf);
-		}
-		val = 0;
-		ioctl(sock, FIONBIO, &val);
-		if(parsed.size() == 3)
-			return std::make_tuple(parsed[0].c_str(), std::stoi(parsed[1]), std::stoi(parsed[2]));
-		else
-			return std::make_tuple(parsed[0].c_str(), -1, -1);
-	}
-}
-#else
 std::tuple<std::string, int, int> Net::get(){
-	char data[32] = {0};
+	char data[32];
+	memset(data, 0, sizeof(data));
 	std::string ret;
 	int n = 0;
-	u_long val = 1;
-	ioctlsocket(sock, FIONBIO, &val);
 	n = recv(sock, data, 32, 0);
 	if(n < 1){
-		if(WSAGetLastError() == WSAEWOULDBLOCK){
-			val = 0;
-			ioctlsocket(sock, FIONBIO, &val);
-			return std::make_tuple("nodata", -1, -1);
-		} else{
-			val = 0;
-			ioctlsocket(sock, FIONBIO, &val);
-			closed = 1;
-			return std::make_tuple("nodata", -1, -1);
-		}
+		return std::make_tuple("nodata", -1, -1);
 	}
-	ret = data;
+	ret.assign(data);
 	std::vector<std::string> parsed;
 	std::stringstream stream{ret};
 	std::string buf;
@@ -211,5 +175,4 @@ std::tuple<std::string, int, int> Net::get(){
 	else
 		return std::make_tuple(parsed[0], -1, -1);
 }
-#endif // Linux_System
 
