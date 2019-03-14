@@ -9,6 +9,16 @@ Net::Net():closed(0),ready(0){}
 Net::~Net(){
 	close(sock);
 }
+
+int Net::makeconnect(std::string ip){
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	server.sin_family = AF_INET;
+	server.sin_port = htons(45451);
+	host = gethostbyname(ip.c_str());
+	if(host == NULL)	return -1;
+	server.sin_addr.s_addr = *(unsigned int *)host->h_addr_list[0];
+	return connect(sock, (struct sockaddr *)&server, sizeof(server));
+}
 #else
 Net::Net():closed(0), ready(0){
 	WSADATA wsaData;
@@ -19,13 +29,6 @@ Net::~Net(){
 	closesocket(sock);
 	WSACleanup();
 }
-#endif
-
-void Net::close(){
-	std::string request = "CLOSED";
-	send(sock, request.c_str(), request.size() + 1, 0);
-	closed = 1;
-}
 
 int Net::makeconnect(std::string ip){
 	sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -35,7 +38,13 @@ int Net::makeconnect(std::string ip){
 	if(host == NULL)	return -1;
 	server.sin_addr.S_un.S_addr = *(unsigned int *)host->h_addr_list[0];
 	return connect(sock, (struct sockaddr *)&server, sizeof(server));
+}
+#endif
 
+void Net::closing(){
+	std::string request = "CLOSED";
+	send(sock, request.c_str(), request.size() + 1, 0);
+	closed = 1;
 }
 
 std::tuple<int, int> Net::login(long long room){

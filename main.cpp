@@ -186,7 +186,7 @@ int main(int argc, char *argv[]){
 						graphic.~Graphic();
 						SDL_Quit();
 						if(mode == 1){
-							net->close();
+							net->closing();
 							netthread.join();
 							net.release();
 						}

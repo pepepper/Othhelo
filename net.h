@@ -2,10 +2,13 @@
 #include <utility>
 
 #ifdef Linux_System
+typedef int SOCKET;
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-
+#include <netdb.h>
+#include <string.h>
+#include <unistd.h>
 #else
 #include <winsock2.h>
 #endif // 
@@ -14,7 +17,7 @@ class Net{
 	public:
 	Net();
 	~Net();
-	void close();
+	void closing();
 	int makeconnect(std::string host);
 	std::tuple<int, int> login(long long room, std::string pass);
 	std::tuple<int, int> login(long long room);
