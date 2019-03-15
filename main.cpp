@@ -87,7 +87,7 @@ int main(int argc, char *argv[]){
 					pass = strGetOption("パスワードを入力してください:");
 					net->setpassword(pass);
 				}
-				std::cout << "部屋番号:" + std::to_string(room);
+				std::cout << "部屋番号:" + std::to_string(room)<<std::endl;
 			} else if(netmode == 1){//guest
 				netmode = 1;
 				std::tuple<int, int> size;
