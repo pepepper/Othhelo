@@ -6,7 +6,7 @@ class Game{
 	Game(int x, int y);
 	~Game();
 	bool put(int x, int y);
-	bool put(int x, int y,int freeput);
+	bool put(int x, int y, int freeput);
 	void canPass();
 	Boards *board;
 	bool full = false;

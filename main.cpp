@@ -88,7 +88,7 @@ int main(int argc, char *argv[]){
 					pass = strGetOption("パスワードを入力してください:");
 					net->setpassword(pass);
 				}
-				std::cout << "部屋番号:" + std::to_string(room)<<std::endl;
+				std::cout << "部屋番号:" + std::to_string(room) << std::endl;
 			} else if(netmode == 1){//guest
 				netmode = 1;
 				std::tuple<int, int> size;
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	SDL_Init(SDL_INIT_EVERYTHING);
-	eventid=SDL_RegisterEvents(1);
+	eventid = SDL_RegisterEvents(1);
 	Graphic graphic;
 	dialogbox dialog;
 
@@ -123,21 +123,21 @@ int main(int argc, char *argv[]){
 	graphic.changeturn(game->turn);
 	graphic.update();
 	if(mode == 1)graphic.netwait();
-	if(mode == 1)netthread = std::thread([&game, &net, &graphic, &freeput, &netmode,&eventid]{
+	if(mode == 1)netthread = std::thread([&game, &net, &graphic, &freeput, &netmode, &eventid]{
 		SDL_Event graph;
-		while(net->closed==0){
+		while(net->closed == 0){
 			std::tuple<std::string, int, int> action = net->get();
 			if(!std::get<0>(action).compare("nodata")){
 				net->closed = 1;
 			} else if(!std::get<0>(action).compare("PUT") && netmode != game->turn){
 				game->put(std::get<1>(action), std::get<2>(action));
 				SDL_zero(graph);
-				graph.type=eventid;
+				graph.type = eventid;
 				SDL_PushEvent(&graph);
 			} else if(!std::get<0>(action).compare("FREEPUT") && netmode != game->turn){
 				game->put(std::get<1>(action), std::get<2>(action), freeput);
 				SDL_zero(graph);
-				graph.type=eventid;
+				graph.type = eventid;
 				SDL_PushEvent(&graph);
 			} else if(!std::get<0>(action).compare("CLOSED")){
 				net->closed = 1;
@@ -150,10 +150,10 @@ int main(int argc, char *argv[]){
 										 });
 	while(true){
 		while(SDL_WaitEvent(&e)){
-			if(e.type==eventid){
+			if(e.type == eventid){
 				graphic.Put(game->board->delta);
-								graphic.changeturn(game->turn);
-								graphic.update();
+				graphic.changeturn(game->turn);
+				graphic.update();
 			}
 			switch(e.type){
 				case SDL_WINDOWEVENT:
@@ -202,7 +202,7 @@ int main(int argc, char *argv[]){
 					}
 					break;
 			}
-			if(mode==1&&net->closed==1&&net->ready==1){
+			if(mode == 1 && net->closed == 1 && net->ready == 1){
 				dialog.ConnectionclosedDialogBox();
 				graphic.end();
 			}

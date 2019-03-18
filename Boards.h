@@ -13,7 +13,7 @@ class Boards{
 	bool freeput(int x, int y, int turn);
 	std::vector<std::vector<int>> delta;
 	std::pair<int, int> Count();
-	std::array<std::array<int,16>,16> board;
+	std::array<std::array<int, 16>, 16> board;
 	int boardx, boardy;
 	private:
 	void Reverse(unsigned int x, unsigned int y, int vect_x, int vect_y, int turn);//石をひっくり返す

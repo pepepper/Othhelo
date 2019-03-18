@@ -21,12 +21,12 @@ class Net{
 	int makeconnect(std::string host);
 	std::tuple<int, int> login(long long room, std::string pass);
 	std::tuple<int, int> login(long long room);
-	long long makeroom(int x,int y);
+	long long makeroom(int x, int y);
 	int setpassword(std::string pass);
 	int put(int x, int y);
 	int freeput(int x, int y);
 	std::tuple<std::string, int, int> get();
-	int closed,ready,started;
+	int closed, ready, started;
 	private:
 	struct hostent *host;
 	struct sockaddr_in server;
