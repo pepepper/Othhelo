@@ -36,6 +36,7 @@ int main(int argc, char *argv[]){
 	long long room;
 	SDL_Event e;
 	int x, y, mode = -1, netmode = -1, netret, freeput = 0;
+	Uint32 eventid;
 	std::unique_ptr<Game> game;
 	std::unique_ptr<Net> net;
 	std::thread netthread;
@@ -113,6 +114,7 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	SDL_Init(SDL_INIT_EVERYTHING);
+	eventid=SDL_RegisterEvents(1);
 	Graphic graphic;
 	dialogbox dialog;
 
@@ -121,21 +123,22 @@ int main(int argc, char *argv[]){
 	graphic.changeturn(game->turn);
 	graphic.update();
 	if(mode == 1)graphic.netwait();
-	if(mode == 1)netthread = std::thread([&game, &net, &graphic, &freeput, &netmode]{
+	if(mode == 1)netthread = std::thread([&game, &net, &graphic, &freeput, &netmode,&eventid]{
+		SDL_Event graph;
 		while(net->closed==0){
 			std::tuple<std::string, int, int> action = net->get();
 			if(!std::get<0>(action).compare("nodata")){
 				net->closed = 1;
 			} else if(!std::get<0>(action).compare("PUT") && netmode != game->turn){
 				game->put(std::get<1>(action), std::get<2>(action));
-				graphic.Put(game->board->delta);
-				graphic.changeturn(game->turn);
-				graphic.update();
+				SDL_zero(graph);
+				graph.type=eventid;
+				SDL_PushEvent(&graph);
 			} else if(!std::get<0>(action).compare("FREEPUT") && netmode != game->turn){
 				game->put(std::get<1>(action), std::get<2>(action), freeput);
-				graphic.Put(game->board->delta);
-				graphic.changeturn(game->turn);
-				graphic.update();
+				SDL_zero(graph);
+				graph.type=eventid;
+				SDL_PushEvent(&graph);
 			} else if(!std::get<0>(action).compare("CLOSED")){
 				net->closed = 1;
 			} else if(!std::get<0>(action).compare("READY")){
@@ -147,6 +150,11 @@ int main(int argc, char *argv[]){
 										 });
 	while(true){
 		while(SDL_WaitEvent(&e)){
+			if(e.type==eventid){
+				graphic.Put(game->board->delta);
+								graphic.changeturn(game->turn);
+								graphic.update();
+			}
 			switch(e.type){
 				case SDL_WINDOWEVENT:
 					if(e.window.event == SDL_WINDOWEVENT_EXPOSED){
@@ -197,7 +205,6 @@ int main(int argc, char *argv[]){
 			if(mode==1&&net->closed==1&&net->ready==1){
 				dialog.ConnectionclosedDialogBox();
 				graphic.end();
-				net->ready = 0;
 			}
 		}
 	}

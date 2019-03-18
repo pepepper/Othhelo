@@ -53,8 +53,10 @@ void Graphic::Put(std::vector<std::vector<int>> &delta){//[n][0] white/black [n]
 	for(int i = 0; delta[i][0] && i < 40; i++){
 		komarect.x = 132 * delta[i][1];
 		komarect.y = 132 * delta[i][2];
-		if(delta[i][0] == -1)SDL_RenderCopy(renderer, black, NULL, &komarect);
-		else if(delta[i][0] == 1)SDL_RenderCopy(renderer, white, NULL, &komarect);
+		if(delta[i][0] == -1)
+			SDL_RenderCopy(renderer, black, NULL, &komarect);
+		else if(delta[i][0] == 1)
+			SDL_RenderCopy(renderer, white, NULL, &komarect);
 		delta[i][0] = delta[i][1] = delta[i][2] = 0;
 	}
 	SDL_SetRenderTarget(renderer, NULL);
