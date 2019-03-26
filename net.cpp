@@ -54,13 +54,13 @@ int Net::makeconnect(std::string ip){
 #endif
 
 void Net::closing(){
-	std::string request = "CLOSED";
+	std::string request = "CLOSED\n";
 	if(send(sock, request.c_str(), request.size() + 1, 0) == -1)std::cout << "send error:" << errno << std::endl;
 	closed = 1;
 }
 
 std::tuple<int, int> Net::login(long long room){
-	std::string request = "LOGIN " + std::to_string(room);
+	std::string request = "LOGIN " + std::to_string(room)+"\n";
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length() + 1;
@@ -73,6 +73,9 @@ std::tuple<int, int> Net::login(long long room){
 	if(length > result)
 		return std::make_tuple<int, int>(-1, -1);
 	if(recv(sock, data, 32, 0) == -1)std::cout << "recv error:" << errno << std::endl;
+	for(int i=0;i<32&&data[0]==0;i++){
+		data[i]=data[i+1];
+	}
 	reply += data;
 
 	std::stringstream stream(reply);
@@ -83,7 +86,7 @@ std::tuple<int, int> Net::login(long long room){
 			replys.push_back(temp);
 		}
 	}
-	if(!replys[0].compare("SUCCESS")){
+	if(replys[0].find("SUCCESS")!=std::string::npos){
 		return std::make_tuple<int, int>(std::stoi(replys[1]), std::stoi(replys[2]));
 	}
 	closed = 1;
@@ -91,7 +94,7 @@ std::tuple<int, int> Net::login(long long room){
 }
 
 std::tuple<int, int> Net::login(long long room, std::string pass){
-	std::string request = "LOGIN " + std::to_string(room) + " PASSWORD " + pass;
+	std::string request = "LOGIN " + std::to_string(room) + " PASSWORD " + pass+"\n";
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length() + 1;
@@ -104,6 +107,9 @@ std::tuple<int, int> Net::login(long long room, std::string pass){
 	if(length > result)
 		return std::make_tuple<int, int>(-1, -1);
 	if(recv(sock, data, 32, 0) == -1)std::cout << "recv error:" << errno << std::endl;
+	for(int i=0;i<32&&data[0]==0;i++){
+		data[i]=data[i+1];
+	}
 	reply += data;
 	std::stringstream stream(reply);
 	std::string temp;
@@ -113,7 +119,7 @@ std::tuple<int, int> Net::login(long long room, std::string pass){
 			replys.push_back(temp);
 		}
 	}
-	if(!replys[0].compare("SUCCESS")){
+	if(replys[0].find("SUCCESS")!=std::string::npos){
 		return std::make_tuple<int, int>(std::stoi(replys[1]), std::stoi(replys[2]));
 	}
 	closed = 1;
@@ -121,7 +127,7 @@ std::tuple<int, int> Net::login(long long room, std::string pass){
 }
 
 long long Net::makeroom(int x, int y){
-	std::string request = "ROOM " + std::to_string(x) + " " + std::to_string(y);
+	std::string request = "ROOM " + std::to_string(x) + " " + std::to_string(y)+"\n";
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length() + 1;
@@ -131,6 +137,9 @@ long long Net::makeroom(int x, int y){
 		return -1;
 	}
 	if(recv(sock, data, 32, 0) == -1)std::cout << "recv error:" << errno << std::endl;
+	for(int i=0;i<32&&data[0]==0;i++){
+		data[i]=data[i+1];
+	}
 	reply.assign(data);
 	std::stringstream stream(reply);
 	std::string temp;
@@ -140,7 +149,7 @@ long long Net::makeroom(int x, int y){
 			replys.push_back(temp);
 		}
 	}
-	if(!replys[0].compare("SUCCESS")){
+	if(replys[0].find("SUCCESS")!=std::string::npos){
 		return std::stoll(replys[1]);
 	}
 	closed = 1;
@@ -148,7 +157,7 @@ long long Net::makeroom(int x, int y){
 }
 
 int Net::setpassword(std::string pass){
-	std::string request = "SETPASSWORD " + pass;
+	std::string request = "SETPASSWORD " + pass+"\n";
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length();
@@ -159,8 +168,11 @@ int Net::setpassword(std::string pass){
 		return -1;
 	}
 	if(recv(sock, data, 32, 0) == -1)std::cout << "recv error:" << errno << std::endl;
+		for(int i=0;i<32&&data[0]==0;i++){
+		data[i]=data[i+1];
+	}
 	reply += data;
-	if(!reply.compare("SUCCESS"))return 0;
+	if(reply.find("SUCCESS")!=std::string::npos)return 0;
 	closed = 1;
 	return -1;
 }
@@ -168,7 +180,7 @@ int Net::setpassword(std::string pass){
 int Net::put(int x, int y){
 	char data[32] = {0};
 	std::string reply;
-	std::string request = "PUT " + std::to_string(x) + " " + std::to_string(y);
+	std::string request = "PUT " + std::to_string(x) + " " + std::to_string(y)+"\n";
 	int result, length = request.length();
 	result = send(sock, request.c_str(), request.size() + 1, 0);
 
@@ -177,16 +189,18 @@ int Net::put(int x, int y){
 		return -1;
 	}
 	if(recv(sock, data, 32, 0) == -1)std::cout << "recv error:" << errno << std::endl;
+		for(int i=0;i<32&&data[0]==0;i++){
+		data[i]=data[i+1];
+	}
 	reply += data;
-	if(!reply.compare("SUCCESS"))return 0;
-	closed = 1;
+	if(reply.find("SUCCESS")!=std::string::npos)return 0;
 	return -1;
 }
 
 int Net::freeput(int x, int y){
 	char data[32] = {0};
 	std::string reply;
-	std::string request = "FREEPUT " + std::to_string(x) + " " + std::to_string(y);
+	std::string request = "FREEPUT " + std::to_string(x) + " " + std::to_string(y)+"\n";
 	int result, length = request.length();
 	result = send(sock, request.c_str(), request.size() + 1, 0);
 
@@ -196,9 +210,11 @@ int Net::freeput(int x, int y){
 		return -1;
 	}
 	if(recv(sock, data, 32, 0) == -1)std::cout << "recv error:" << errno << std::endl;
+		for(int i=0;i<32&&data[0]==0;i++){
+		data[i]=data[i+1];
+	}
 	reply += data;
-	if(!reply.compare("SUCCESS"))return 0;
-	closed = 1;
+	if(reply.find("SUCCESS")!=std::string::npos)return 0;
 	return -1;
 }
 
@@ -210,6 +226,9 @@ std::tuple<std::string, int, int> Net::get(){
 	if(n < 1){
 		if(n == -1)std::cout << "recv error:" << errno << std::endl;
 		return std::make_tuple("nodata", -1, -1);
+	}
+	for(int i=0;i<32&&data[0]==0;i++){
+		data[i]=data[i+1];
 	}
 	ret.assign(data);
 	std::vector<std::string> parsed;
@@ -224,3 +243,15 @@ std::tuple<std::string, int, int> Net::get(){
 		return std::make_tuple(parsed[0], -1, -1);
 }
 
+void Net::success(){
+	std::string request = "SUCCESS\n";
+	int result, length = request.length();
+	result = send(sock, request.c_str(), request.size() + 1, 0);
+
+	if(length > result){
+		if(result == -1)std::cout << "send error:" << errno << std::endl;
+		closed = 1;
+		return ;
+	}
+	return;
+}

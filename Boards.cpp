@@ -45,7 +45,7 @@ bool Boards::isPutable(unsigned int x, unsigned int y, int deltax, int deltay, i
 
 	x += deltax;
 	y += deltay;
-	while(board[x][y]!=99){
+	while(x<15 && y<15 && board[x][y]!=99){
 		if(board[x][y] == 0)return false;
 		if(board[x][y] == turn)return true;
 		x += deltax;

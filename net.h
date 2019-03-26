@@ -25,6 +25,7 @@ class Net{
 	int setpassword(std::string pass);
 	int put(int x, int y);
 	int freeput(int x, int y);
+	void success();
 	std::tuple<std::string, int, int> get();
 	int closed, ready, started;
 	private:

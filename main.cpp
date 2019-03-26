@@ -127,21 +127,23 @@ int main(int argc, char *argv[]){
 		SDL_Event graph;
 		while(net->closed == 0){
 			std::tuple<std::string, int, int> action = net->get();
-			if(!std::get<0>(action).compare("nodata")){
+			if(std::get<0>(action).find("nodata")!=std::string::npos){
 				net->closed = 1;
-			} else if(!std::get<0>(action).compare("PUT") && netmode != game->turn){
-				game->put(std::get<1>(action), std::get<2>(action));
-				SDL_zero(graph);
-				graph.type = eventid;
-				SDL_PushEvent(&graph);
-			} else if(!std::get<0>(action).compare("FREEPUT") && netmode != game->turn){
+			} else if(std::get<0>(action).find("FREEPUT")!=std::string::npos && netmode != game->turn){
 				game->put(std::get<1>(action), std::get<2>(action), freeput);
+				net->success();
 				SDL_zero(graph);
 				graph.type = eventid;
 				SDL_PushEvent(&graph);
-			} else if(!std::get<0>(action).compare("CLOSED")){
+			} else if(std::get<0>(action).find("PUT")!=std::string::npos && netmode != game->turn){
+				game->put(std::get<1>(action), std::get<2>(action));
+				net->success();
+				SDL_zero(graph);
+				graph.type = eventid;
+				SDL_PushEvent(&graph);
+			}else if(std::get<0>(action).find("CLOSED")!=std::string::npos){
 				net->closed = 1;
-			} else if(!std::get<0>(action).compare("READY")){
+			} else if(std::get<0>(action).find("READY")!=std::string::npos){
 				graphic.changeturn(game->turn);
 				net->started = 1;
 				net->ready = 1;
@@ -205,6 +207,7 @@ int main(int argc, char *argv[]){
 			if(mode == 1 && net->closed == 1 && net->ready == 1){
 				dialog.ConnectionclosedDialogBox();
 				graphic.end();
+				net->ready=0;
 			}
 		}
 	}
