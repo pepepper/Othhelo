@@ -54,13 +54,13 @@ int Net::makeconnect(std::string ip){
 #endif
 
 void Net::closing(){
-	std::string request = "CLOSED\n";
+	std::string request = "CLOSED \n";
 	if(send(sock, request.c_str(), request.size() + 1, 0) == -1)std::cout << "send error:" << errno << std::endl;
 	closed = 1;
 }
 
 std::tuple<int, int> Net::login(long long room){
-	std::string request = "LOGIN " + std::to_string(room)+"\n";
+	std::string request = "LOGIN " + std::to_string(room)+" \n";
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length() + 1;
@@ -94,7 +94,7 @@ std::tuple<int, int> Net::login(long long room){
 }
 
 std::tuple<int, int> Net::login(long long room, std::string pass){
-	std::string request = "LOGIN " + std::to_string(room) + " PASSWORD " + pass+"\n";
+	std::string request = "LOGIN " + std::to_string(room) + " PASSWORD " + pass+" \n";
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length() + 1;
@@ -127,7 +127,7 @@ std::tuple<int, int> Net::login(long long room, std::string pass){
 }
 
 long long Net::makeroom(int x, int y){
-	std::string request = "ROOM " + std::to_string(x) + " " + std::to_string(y)+"\n";
+	std::string request = "ROOM " + std::to_string(x) + " " + std::to_string(y)+" \n";
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length() + 1;
@@ -157,7 +157,7 @@ long long Net::makeroom(int x, int y){
 }
 
 int Net::setpassword(std::string pass){
-	std::string request = "SETPASSWORD " + pass+"\n";
+	std::string request = "SETPASSWORD " + pass+" \n";
 	char data[32] = {0};
 	std::string reply;
 	int result, length = request.length();
@@ -180,7 +180,7 @@ int Net::setpassword(std::string pass){
 int Net::put(int x, int y){
 	char data[32] = {0};
 	std::string reply;
-	std::string request = "PUT " + std::to_string(x) + " " + std::to_string(y)+"\n";
+	std::string request = "PUT " + std::to_string(x) + " " + std::to_string(y)+" \n";
 	int result, length = request.length();
 	result = send(sock, request.c_str(), request.size() + 1, 0);
 
@@ -200,7 +200,7 @@ int Net::put(int x, int y){
 int Net::freeput(int x, int y){
 	char data[32] = {0};
 	std::string reply;
-	std::string request = "FREEPUT " + std::to_string(x) + " " + std::to_string(y)+"\n";
+	std::string request = "FREEPUT " + std::to_string(x) + " " + std::to_string(y)+" \n";
 	int result, length = request.length();
 	result = send(sock, request.c_str(), request.size() + 1, 0);
 
@@ -244,7 +244,7 @@ std::tuple<std::string, int, int> Net::get(){
 }
 
 void Net::success(){
-	std::string request = "SUCCESS\n";
+	std::string request = "SUCCESS \n";
 	int result, length = request.length();
 	result = send(sock, request.c_str(), request.size() + 1, 0);
 
