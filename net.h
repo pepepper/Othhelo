@@ -22,10 +22,9 @@ class Net{
 	std::tuple<int, int> login(long long room, std::string pass);
 	std::tuple<int, int> login(long long room);
 	long long makeroom(int x, int y);
-	int setpassword(std::string pass);
+	long long makeroom(int x, int y,std::string pass);
 	int put(int x, int y);
 	int freeput(int x, int y);
-	void success();
 	std::tuple<std::string, int, int> get();
 	int closed, ready, started;
 	private:

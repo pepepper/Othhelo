@@ -72,7 +72,6 @@ int main(int argc, char *argv[]){
 				}
 				if(intGetOption("盤面サイズを指定しますか?\n0:指定しない 1:指定する :") == 0){
 					game.reset(new Game());
-					room = net->makeroom(game->board->boardx, game->board->boardy);
 				} else{
 					std::string sx, sy;
 					int x, y;
@@ -80,14 +79,13 @@ int main(int argc, char *argv[]){
 					y = intGetOption("8以下で横のサイズを入力してください(盤面は入力された数値の倍のサイズになります):");
 					if(x > 8 || y > 8)throw std::invalid_argument("");
 					game.reset(new Game(x, y));
-					room = net->makeroom(x, y);
 				}
 				std::cout << "パスワードを設定しますか?" << std::endl << "0:設定しない 1:設定する :";
 				std::cin >> arg;
 				if(!arg.compare("1")){
 					pass = strGetOption("パスワードを入力してください:");
-					net->setpassword(pass);
-				}
+						room = net->makeroom(game->board->boardx/2, game->board->boardy/2,pass);
+				}else 	room = net->makeroom(game->board->boardx/2, game->board->boardy/2);
 				std::cout << "部屋番号:" + std::to_string(room) << std::endl;
 			} else if(netmode == 1){//guest
 				netmode = 1;
@@ -131,13 +129,11 @@ int main(int argc, char *argv[]){
 				net->closed = 1;
 			} else if(std::get<0>(action).find("FREEPUT")!=std::string::npos && netmode != game->turn){
 				game->put(std::get<1>(action), std::get<2>(action), freeput);
-				net->success();
 				SDL_zero(graph);
 				graph.type = eventid;
 				SDL_PushEvent(&graph);
 			} else if(std::get<0>(action).find("PUT")!=std::string::npos && netmode != game->turn){
 				game->put(std::get<1>(action), std::get<2>(action));
-				net->success();
 				SDL_zero(graph);
 				graph.type = eventid;
 				SDL_PushEvent(&graph);
