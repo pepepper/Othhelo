@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include <tuple>
 #include <thread>
-//todo 接続確立前の鯖落ち
+
 int intGetOption(const char *message){
 	std::string temp;
 	std::cout << message;
