@@ -12,7 +12,7 @@ VisualStudio2017でプロジェクトをビルドしてください
 Linuxでは"Boxer"を使用しているため、cloneするときは  
 `git clone --recursive https://github.com/pepepper/Othhelo.git`  
 または  
-`git clone https://github.com/pepepper/Othhelo.git & git submodule init & git submodule update`  
+`git clone https://github.com/pepepper/Othhelo.git && git submodule init && git submodule update`  
 としてください  
 その後CMakeしてください  
 
