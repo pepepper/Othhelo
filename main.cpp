@@ -9,19 +9,20 @@
 #include <typeinfo>
 #include <tuple>
 #include <thread>
+#include<iomanip>
 
 int intGetOption(const char *message){
-	std::string temp;
+	int temp;
 	std::cout << message;
 	std::cin >> temp;
-	return std::stoi(temp);
+	return temp;
 }
 
 long long llGetOption(const char *message){
-	std::string temp;
+	long long temp;
 	std::cout << message;
 	std::cin >> temp;
-	return std::stoll(temp);
+	return temp;
 }
 
 std::string strGetOption(const char *message){
@@ -86,11 +87,13 @@ int main(int argc, char *argv[]){
 					pass = strGetOption("パスワードを入力してください:");
 						room = net->makeroom(game->board->boardx/2, game->board->boardy/2,pass);
 				}else 	room = net->makeroom(game->board->boardx/2, game->board->boardy/2);
-				std::cout << "部屋番号:" + std::to_string(room) << std::endl;
+				std::cout << "部屋番号:" <<std::hex<< room<<std::dec << std::endl;
 			} else if(netmode == 1){//guest
 				netmode = 1;
 				std::tuple<int, int> size;
+				std::cin.setf(std::ios::hex, std::ios::basefield);
 				room = llGetOption("部屋番号を入力してください:");
+				std::cin.setf(std::ios::dec, std::ios::basefield);
 				std::cout << "パスワードが設定されていますか?" << std::endl << "0:設定されていない 1:設定されている :";
 				std::cin >> arg;
 				if(arg.compare("0") && arg.compare("1"))throw std::invalid_argument("");

@@ -1,17 +1,9 @@
 ﻿#include <string>
 #include <utility>
+#include <errno.h>  
+#include <openssl/bio.h>
+#include <openssl/err.h>
 
-#ifdef Linux_System
-typedef int SOCKET;
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <string.h>
-#include <unistd.h>
-#else
-#include <winsock2.h>
-#endif // 
 
 class Net{
 	public:
@@ -28,7 +20,7 @@ class Net{
 	std::tuple<std::string, int, int> get();
 	int closed, ready, started;
 	private:
-	struct hostent *host;
-	struct sockaddr_in server;
-	SOCKET sock;
+	void send_with_retry(std::string);
+	void read_with_retry(std::string&);
+	BIO *sock;
 };
