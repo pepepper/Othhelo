@@ -85,9 +85,9 @@ int main(int argc, char *argv[]){
 				std::cin >> arg;
 				if(!arg.compare("1")){
 					pass = strGetOption("パスワードを入力してください:");
-						room = net->makeroom(game->board->boardx/2, game->board->boardy/2,pass);
-				}else 	room = net->makeroom(game->board->boardx/2, game->board->boardy/2);
-				std::cout << "部屋番号:" <<std::hex<< room<<std::dec << std::endl;
+					room = net->makeroom(game->board->boardx / 2, game->board->boardy / 2, pass);
+				} else 	room = net->makeroom(game->board->boardx / 2, game->board->boardy / 2);
+				std::cout << "部屋番号:" << std::hex << room << std::dec << std::endl;
 			} else if(netmode == 1){//guest
 				netmode = 1;
 				std::tuple<int, int> size;
@@ -128,21 +128,21 @@ int main(int argc, char *argv[]){
 		SDL_Event graph;
 		while(net->closed == 0){
 			std::tuple<std::string, int, int> action = net->get();
-			if(std::get<0>(action).find("nodata")!=std::string::npos){
+			if(std::get<0>(action).find("nodata") != std::string::npos){
 				net->closed = 1;
-			} else if(std::get<0>(action).find("FREEPUT")!=std::string::npos && netmode != game->turn){
+			} else if(std::get<0>(action).find("FREEPUT") != std::string::npos && netmode != game->turn){
 				game->put(std::get<1>(action), std::get<2>(action), freeput);
 				SDL_zero(graph);
 				graph.type = eventid;
 				SDL_PushEvent(&graph);
-			} else if(std::get<0>(action).find("PUT")!=std::string::npos && netmode != game->turn){
+			} else if(std::get<0>(action).find("PUT") != std::string::npos && netmode != game->turn){
 				game->put(std::get<1>(action), std::get<2>(action));
 				SDL_zero(graph);
 				graph.type = eventid;
 				SDL_PushEvent(&graph);
-			}else if(std::get<0>(action).find("CLOSED")!=std::string::npos){
+			} else if(std::get<0>(action).find("CLOSED") != std::string::npos){
 				net->closed = 1;
-			} else if(std::get<0>(action).find("READY")!=std::string::npos){
+			} else if(std::get<0>(action).find("READY") != std::string::npos){
 				graphic.changeturn(game->turn);
 				net->started = 1;
 				net->ready = 1;
@@ -172,16 +172,16 @@ int main(int argc, char *argv[]){
 						if(freeput == 0){
 							if(game->put(x, y)){
 								if(mode == 1)net->put(x, y);
-								graphic.Put(game->board->delta);
-								graphic.changeturn(game->turn);
-								graphic.update();
+
 							}
 						} else if(game->put(x, y, freeput)){
 							if(mode == 1)net->freeput(x, y);
-							graphic.Put(game->board->delta);
-							graphic.changeturn(game->turn);
-							graphic.update();
+
 						}
+						graphic.Put(game->board->delta);
+						if(mode==0)graphic.changeturn(game->turn);
+						else graphic.netchangeturn(game->turn^netmode);
+						graphic.update();
 						if(game->full){
 							dialog.EndGameDialogBox(game->b, game->w, game->howturn);
 							graphic.end();
@@ -206,7 +206,7 @@ int main(int argc, char *argv[]){
 			if(mode == 1 && net->closed == 1 && net->ready == 1){
 				dialog.ConnectionclosedDialogBox();
 				graphic.end();
-				net->ready=0;
+				net->ready = 0;
 			}
 		}
 	}

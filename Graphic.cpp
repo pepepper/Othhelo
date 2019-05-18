@@ -60,16 +60,21 @@ void Graphic::Put(std::vector<std::vector<int>> &delta){//[n][0] white/black [n]
 		delta[i][0] = delta[i][1] = delta[i][2] = 0;
 	}
 	SDL_SetRenderTarget(renderer, NULL);
-	SDL_RenderCopy(renderer, tex, NULL, NULL);
 }
 
 void Graphic::update(){
+	SDL_RenderCopy(renderer, tex, NULL, NULL);
 	SDL_RenderPresent(renderer);
 }
 
 void Graphic::changeturn(int turn){
 	if(turn == 1)	SDL_SetWindowTitle(window, u8"オセロ?:白番です");
 	if(turn == -1)	SDL_SetWindowTitle(window, u8"オセロ?:黒番です");
+}
+
+void Graphic::netchangeturn(int turn){
+	if(turn == 0)	SDL_SetWindowTitle(window, u8"オセロ?:あなたの番です");
+	if(turn == 1)	SDL_SetWindowTitle(window, u8"オセロ?:相手の番です");
 }
 
 void Graphic::end(){
