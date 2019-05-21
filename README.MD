@@ -4,10 +4,10 @@ This is not othello, is this?
 # ビルド
 Windowsの時はSDLの公式サイトからDevelopment Librariesをダウンロードして  
 プロジェクトのルートフォルダにおいてください  
-現在のコミットではSDL2-2.0.8とSDL2_net-2.0.1が必要ですが  
-VSのソリューションのライブラリパス/インクルードパスを書き換えることによって  
-別のバージョンでも使用できます  
-VisualStudio2017でプロジェクトをビルドしてください  
+現在のコミットではSDL2-2.0.8が必要ですが  
+VSのソリューションのライブラリパス/インクルードパスを書き換えることによって別のバージョンでも使用できます 
+またOpenSSLの開発用のファイルなども https://slproweb.com/products/Win32OpenSSL.html などからダウンロードしてください
+VisualStudio2017用プロジェクトファイルを同梱しています  
   
 Linuxでは"Boxer"を使用しているため、cloneするときは  
 `git clone --recursive https://github.com/pepepper/Othhelo.git`  
@@ -17,7 +17,8 @@ Linuxでは"Boxer"を使用しているため、cloneするときは
 その後CMakeしてください  
 
 # 実行
-SDL2 SDL2_netが必要です ただしWindows版のリリースにはDLLファイルを同梱します  
+SDL2とOpenSSLが必要です ただしWindows版のリリースにSDLのDLLファイルは同梱します  
+OpenSSLのWindows版コンパイル済みバイナリは https://slproweb.com/products/Win32OpenSSL.html などからダウンロードしてください  
 実行するとプロンプトが表示されて質問されるので半角数字で入力してください  
   
 では良いガバオセロライフを！
