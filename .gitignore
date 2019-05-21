@@ -22,3 +22,7 @@ SDL2_net-2.0.1
 .vs/
 x64/
 # End of https://www.gitignore.io/api/cmake
+/Graphic.cpp.bak
+/Graphic.h.bak
+/main.cpp.bak
+/net.cpp.bak

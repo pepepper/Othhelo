@@ -18,6 +18,7 @@ class Net{
 	int put(int x, int y);
 	int freeput(int x, int y);
 	std::tuple<std::string, int, int> get();
+	long long automatch();
 	int closed, ready, started;
 	private:
 	void send_with_retry(std::string);

@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include <tuple>
 #include <thread>
-#include<iomanip>
+#include <iomanip>
 
 int intGetOption(const char *message){
 	int temp;
@@ -34,7 +34,7 @@ std::string strGetOption(const char *message){
 
 int main(int argc, char *argv[]){
 	std::string ip, pass, arg;
-	long long room;
+	unsigned long long room;
 	SDL_Event e;
 	int x, y, mode = -1, netmode = -1, netret, freeput = 0;
 	Uint32 eventid;
@@ -63,8 +63,8 @@ int main(int argc, char *argv[]){
 				std::cout << "通信エラー:終了します" << std::endl;
 				return 1;
 			}
-			netmode = intGetOption("モードを選択してください\n0:ホストとして部屋を立てる 1:ゲストとして部屋に入る :");
-			if(netmode != 0 && netmode != 1)throw std::invalid_argument("");
+			netmode = intGetOption("モードを選択してください\n0:ホストとして部屋を立てる 1:ゲストとして部屋に入る 2:オートマッチング :");
+			if(netmode != 0 && netmode != 1&&netmode!=2)throw std::invalid_argument("");
 			else if(netmode == 0){//host
 				netmode = -1;
 				if(netret == -1){
@@ -109,6 +109,24 @@ int main(int argc, char *argv[]){
 				}
 				game.reset(new Game(std::get<0>(size), std::get<1>(size)));
 			}
+			else if (netmode == 2) {//automatch
+				room = net->automatch();
+				if (room == 0) {
+					netmode = -1;
+					game.reset(new Game());
+					net->makeroom(game->board->boardx / 2, game->board->boardy / 2);
+				}
+				else if (room != -1) {
+					netmode = 1;
+					std::tuple<int, int> size;
+					size = net->login(room);
+					if (std::get<0>(size) == -1) {
+						std::cout << "通信エラー:終了します" << std::endl;
+						return 1;
+					}
+					game.reset(new Game(std::get<0>(size), std::get<1>(size)));
+				}
+			}
 		}
 	} catch(const std::invalid_argument& e){
 		std::cout << "入力が不正です:終了します";
@@ -143,7 +161,7 @@ int main(int argc, char *argv[]){
 			} else if(std::get<0>(action).find("CLOSED") != std::string::npos){
 				net->closed = 1;
 			} else if(std::get<0>(action).find("READY") != std::string::npos){
-				graphic.changeturn(game->turn);
+				graphic.netchangeturn(netmode == game->turn,game->turn);
 				net->started = 1;
 				net->ready = 1;
 			}
@@ -153,7 +171,7 @@ int main(int argc, char *argv[]){
 		while(SDL_WaitEvent(&e)){
 			if(e.type == eventid){
 				graphic.Put(game->board->delta);
-				graphic.changeturn(game->turn);
+				graphic.netchangeturn(netmode == game->turn,game->turn);
 				graphic.update();
 			}
 			switch(e.type){
@@ -179,8 +197,8 @@ int main(int argc, char *argv[]){
 
 						}
 						graphic.Put(game->board->delta);
-						if(mode==0)graphic.changeturn(game->turn);
-						else graphic.netchangeturn(game->turn^netmode);
+						if(mode == 0)graphic.changeturn(game->turn);
+						else graphic.netchangeturn(netmode == game->turn,netmode);
 						graphic.update();
 						if(game->full){
 							dialog.EndGameDialogBox(game->b, game->w, game->howturn);

@@ -185,6 +185,35 @@ std::tuple<std::string, int, int> Net::get(){
 	}
 	if(parsed.size() == 3)
 		return std::make_tuple(parsed[0], std::stoi(parsed[1]), std::stoi(parsed[2]));
+	else if (parsed.size() == 2) {
+		long long int temp=std::stoll(parsed[1]);
+		return std::make_tuple(parsed[0],(temp&0xffffffff00000000)>>32,temp&0xffffffff);
+	}
 	else
 		return std::make_tuple(parsed[0], -1, -1);
+}
+
+
+long long Net::automatch() {
+	std::string request = "AUTO ";
+	std::string reply;
+	send_with_retry(request);
+	if (closed)return -1;
+	read_with_retry(reply);
+	if (closed)return -1;
+
+	std::stringstream stream(reply);
+	std::string temp;
+	std::vector<std::string> replys;
+	while (std::getline(stream, temp, ' ')) {
+		if (!temp.empty()) {
+			replys.push_back(temp);
+		}
+	}
+	if (replys[0].find("HOST") != std::string::npos) {
+		return 0;
+	}
+	else if (replys[0].find("GUEST") != std::string::npos) return std::stoll(replys[1]);
+	closed = 1;
+	return -1;
 }

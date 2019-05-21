@@ -1,11 +1,11 @@
 ﻿#include "Graphic.h"
 
-void SDL_RenderCopyBynum(SDL_Renderer *renderer, SDL_Texture *tex, int x, int y, int w, int h){
-	SDL_Rect rect = {x, y, w, h};
+void SDL_RenderCopyBynum(SDL_Renderer *renderer, SDL_Texture *tex, int x, int y, int w, int h) {
+	SDL_Rect rect = { x, y, w, h };
 	SDL_RenderCopy(renderer, tex, NULL, &rect);
 }
 
-Graphic::Graphic(){
+Graphic::Graphic() {
 	SDL_Surface *temp;
 
 	SDL_CreateWindowAndRenderer(768, 768, NULL, &window, &renderer);
@@ -30,16 +30,16 @@ Graphic::Graphic(){
 }
 
 
-Graphic::~Graphic(){
-	if(board)SDL_DestroyTexture(board);
-	if(board)SDL_DestroyTexture(tex);
-	if(white)SDL_DestroyTexture(white);
-	if(black)SDL_DestroyTexture(black);
-	if(renderer)SDL_DestroyRenderer(renderer);
-	if(window)SDL_DestroyWindow(window);
+Graphic::~Graphic() {
+	if (board)SDL_DestroyTexture(board);
+	if (board)SDL_DestroyTexture(tex);
+	if (white)SDL_DestroyTexture(white);
+	if (black)SDL_DestroyTexture(black);
+	if (renderer)SDL_DestroyRenderer(renderer);
+	if (window)SDL_DestroyWindow(window);
 }
 
-void Graphic::StartGame(){
+void Graphic::StartGame() {
 	SDL_SetRenderTarget(renderer, tex);
 	SDL_SetRenderDrawColor(renderer, 10, 128, 10, 0);
 	SDL_RenderClear(renderer);
@@ -48,39 +48,46 @@ void Graphic::StartGame(){
 	SDL_RenderCopy(renderer, tex, NULL, NULL);
 }
 
-void Graphic::Put(std::vector<std::vector<int>> &delta){//[n][0] white/black [n][1] x [n][2] y
+void Graphic::Put(std::vector<std::vector<int>> &delta) {//[n][0] white/black [n][1] x [n][2] y
 	SDL_SetRenderTarget(renderer, tex);
-	for(int i = 0; delta[i][0] && i < 40; i++){
+	for (int i = 0; delta[i][0] && i < 40; i++) {
 		komarect.x = 132 * delta[i][1];
 		komarect.y = 132 * delta[i][2];
-		if(delta[i][0] == -1)
+		if (delta[i][0] == -1)
 			SDL_RenderCopy(renderer, black, NULL, &komarect);
-		else if(delta[i][0] == 1)
+		else if (delta[i][0] == 1)
 			SDL_RenderCopy(renderer, white, NULL, &komarect);
 		delta[i][0] = delta[i][1] = delta[i][2] = 0;
 	}
 	SDL_SetRenderTarget(renderer, NULL);
 }
 
-void Graphic::update(){
+void Graphic::update() {
 	SDL_RenderCopy(renderer, tex, NULL, NULL);
 	SDL_RenderPresent(renderer);
 }
 
-void Graphic::changeturn(int turn){
-	if(turn == 1)	SDL_SetWindowTitle(window, u8"オセロ?:白番です");
-	if(turn == -1)	SDL_SetWindowTitle(window, u8"オセロ?:黒番です");
+void Graphic::changeturn(int turn) {
+	if (turn == 1)	SDL_SetWindowTitle(window, u8"オセロ?:白番です");
+	if (turn == -1)	SDL_SetWindowTitle(window, u8"オセロ?:黒番です");
 }
 
-void Graphic::netchangeturn(int turn){
-	if(turn == 0)	SDL_SetWindowTitle(window, u8"オセロ?:あなたの番です");
-	if(turn == 1)	SDL_SetWindowTitle(window, u8"オセロ?:相手の番です");
+void Graphic::netchangeturn(int you, int turn) {
+	std::string title = u8"オセロ?:";
+	if (you == 1) {
+		title += u8"あなたの番(";
+		if (turn == -1)title += u8"黒";
+		else title += u8"白";
+		title += u8")です";
+	}
+	else title += u8"相手の番です";
+	SDL_SetWindowTitle(window, title.c_str());
 }
 
-void Graphic::end(){
+void Graphic::end() {
 	SDL_SetWindowTitle(window, u8"オセロ?:ゲーム終了");
 }
 
-void Graphic::netwait(){
+void Graphic::netwait() {
 	SDL_SetWindowTitle(window, u8"オセロ?:対戦相手待ち");
 }

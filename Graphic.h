@@ -8,7 +8,7 @@ class Graphic{
 	void Put(std::vector<std::vector<int>> &delta);
 	void update();
 	void changeturn(int turn);
-	void netchangeturn(int turn);
+	void netchangeturn(int,int);
 	void end();
 	void netwait();
 	~Graphic();
