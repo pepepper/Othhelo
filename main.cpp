@@ -165,6 +165,7 @@ int SDL_main(int argc, char *argv[]){
 				net->ready = 1;
 			}
 		}
+		net->closing();
 										 });
 	while(true){
 		while(SDL_WaitEvent(&e)){
