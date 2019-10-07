@@ -31,7 +31,7 @@ std::string strGetOption(const char *message){
 	return temp;
 }
 
-int SDL_main(int argc, char *argv[]){
+int main(int argc, char *argv[]){
 	std::string ip, pass, arg;
 	unsigned long long room;
 	SDL_Event e;
