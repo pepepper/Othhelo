@@ -47,7 +47,6 @@ bool Game::freeput(int x, int y){
 		std::pair<int, int> koma(board->Count());
 		w = koma.first;
 		b = koma.second;
-		canPass();
 		if(w == 0 || b == 0)full = true;
 		return true;
 	}

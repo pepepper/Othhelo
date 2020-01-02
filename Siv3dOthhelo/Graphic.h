@@ -11,7 +11,7 @@ enum class State
 struct SysState{
 	uint32 termflag;
 	size_t playmode;
-	size_t onlinemode;
+	int onlinemode;
 	std::unique_ptr<Game> game;
 	std::unique_ptr<Net> net;
 	long long room;
@@ -23,6 +23,7 @@ class Setting : public MyApp::Scene{
 private:
 	bool passcheck = false, sizecheck = false;
 	TextEditState ip, room, pass, textx, texty;
+	size_t  onlinemode;
 public:
 	Setting(const InitData& init);
 	void update() override;

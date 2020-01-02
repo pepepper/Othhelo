@@ -2,8 +2,10 @@
 #include <string>
 
 Setting::Setting(const InitData& init) : IScene(init) {
-	getData().termflag = System::GetTerminationTriggers();
-	System::SetTerminationTriggers(0);
+	if (!getData().termflag) {
+		getData().termflag = System::GetTerminationTriggers();
+		System::SetTerminationTriggers(0);
+	}
 	Window::SetTitle(U"オセロ?");
 }
 
@@ -15,19 +17,21 @@ void Setting::update() {
 	if (getData().playmode == 1) {
 		FontAsset(U"Menu")(U"IPアドレス/ドメイン").draw(Vec2(128, 256), ColorF(0.0, 0.5));
 		SimpleGUI::TextBox(ip, Vec2(512, 256));
-		FontAsset(U"Menu")(U"オンラインモード").draw(Vec2(128, 448), ColorF(0.0, 0.5));
-		SimpleGUI::RadioButtons(getData().onlinemode, netmodestr, Vec2(512, 320));
-		if (getData().onlinemode == 1) {
+		FontAsset(U"Menu")(U"オンラインモード").draw(Vec2(128, 320), ColorF(0.0, 0.5));
+		SimpleGUI::RadioButtons(onlinemode, netmodestr, Vec2(512, 320));
+		if (onlinemode == 1) {
 			FontAsset(U"Menu")(U"部屋番号").draw(Vec2(128, 448), ColorF(0.0, 0.5));
 			SimpleGUI::TextBox(room, Vec2(512, 448));
 		}
-		if (getData().onlinemode == 0) {
+		if (onlinemode == 0) {
 			SimpleGUI::CheckBox(sizecheck, U"サイズ指定(0~8)", Vec2(128, 448));
 			if (sizecheck) {
-				SimpleGUI::TextBox(textx, Vec2(512, 448));
-				SimpleGUI::TextBox(texty, Vec2(576, 448));
+				FontAsset(U"Menu")(U"縦:").draw(Vec2(512, 448), ColorF(0.0, 0.5));
+				SimpleGUI::TextBox(texty, Vec2(544, 448),64);
+				FontAsset(U"Menu")(U"横:").draw(Vec2(640, 448), ColorF(0.0, 0.5));
+				SimpleGUI::TextBox(textx, Vec2(672, 448),64);
 			}
-			if (getData().onlinemode == 0 || getData().onlinemode == 1) {
+			if (onlinemode == 0 || onlinemode == 1) {
 				SimpleGUI::CheckBox(passcheck, U"パスワード", Vec2(128, 512));
 				if (passcheck)SimpleGUI::TextBox(pass, Vec2(512, 512));
 			}
@@ -36,8 +40,10 @@ void Setting::update() {
 	else {
 		SimpleGUI::CheckBox(sizecheck, U"サイズ指定(0~8)", Vec2(128, 320));
 		if (sizecheck) {
-			SimpleGUI::TextBox(textx, Vec2(512, 320));
-			SimpleGUI::TextBox(texty, Vec2(576, 320));
+			FontAsset(U"Menu")(U"縦:").draw(Vec2(512, 320), ColorF(0.0, 0.5));
+			SimpleGUI::TextBox(texty, Vec2(544, 320), 64);
+			FontAsset(U"Menu")(U"横:").draw(Vec2(640, 320), ColorF(0.0, 0.5));
+			SimpleGUI::TextBox(textx, Vec2(672, 320), 64);
 		}
 	}
 
@@ -62,7 +68,7 @@ void Setting::update() {
 				System::ShowMessageBox(U"エラー", U"サーバーに接続できませんでした", MessageBoxStyle::Error);
 				return;
 			}
-			if (getData().onlinemode == 0) {
+			if (onlinemode == 0) {
 				if (sizecheck == 0) {
 					getData().game.reset(new Game());
 				}
@@ -84,8 +90,9 @@ void Setting::update() {
 					System::ShowMessageBox(U"エラー", U"部屋の作成に失敗しました", MessageBoxStyle::Error);
 					return;
 				}
+				getData().onlinemode = -1;
 			}
-			else if (getData().onlinemode == 1) {
+			else if (onlinemode == 1) {
 				std::tuple<int, int> size;
 				try {
 					getData().room = ParseInt<long long>(room.text, Arg::radix = 16);
@@ -104,6 +111,7 @@ void Setting::update() {
 					return;
 				}
 				getData().game.reset(new Game(std::get<0>(size), std::get<1>(size)));
+				getData().onlinemode = 1;
 			}
 			else {
 				getData().room = getData().net->automatch();
@@ -114,6 +122,7 @@ void Setting::update() {
 						System::ShowMessageBox(U"エラー", U"部屋の作成に失敗しました", MessageBoxStyle::Error);
 						return;
 					}
+					getData().onlinemode = -1;
 				}
 				else if (getData().room != -1) {
 					std::tuple<int, int> size;
@@ -123,6 +132,7 @@ void Setting::update() {
 						return;
 					}
 					getData().game.reset(new Game(std::get<0>(size), std::get<1>(size)));
+					getData().onlinemode = 1;
 				}
 				else {
 					System::ShowMessageBox(U"エラー", U"オートマッチ中に不正な応答がありました", MessageBoxStyle::Error);
@@ -227,6 +237,7 @@ void Graph::update() {
 		}
 	}
 }
+
 void Graph::changeturn(int turn) {
 	if (turn == 1)	Window::SetTitle(U"オセロ?:白番です(Eキーで設定に戻る)");
 	if (turn == -1)	Window::SetTitle(U"オセロ?:黒番です(Eキーで設定に戻る)");
