@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Siv3dOthhelo", "Siv3dOthhelo\Siv3dOthhelo.vcxproj", "{1544BF16-1408-472A-A619-37874DA1C5BE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1544BF16-1408-472A-A619-37874DA1C5BE}.Debug|x64.ActiveCfg = Debug|x64
+		{1544BF16-1408-472A-A619-37874DA1C5BE}.Debug|x64.Build.0 = Debug|x64
+		{1544BF16-1408-472A-A619-37874DA1C5BE}.Release|x64.ActiveCfg = Release|x64
+		{1544BF16-1408-472A-A619-37874DA1C5BE}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7C665627-7147-4D53-B383-3049F8210EF3}
+	EndGlobalSection
+EndGlobal
