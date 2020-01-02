@@ -1,6 +1,6 @@
-﻿#include "net.h"
-#include<vector>
-#include<sstream>
+#include "net.h"
+#include <vector>
+#include <sstream>
 #include <functional>
 #include <iostream>
 #include <errno.h>
@@ -38,6 +38,7 @@ Net::Net():closed(0), ready(0){
 }
 
 Net::~Net(){
+	BIO_shutdown_wr(sock);
 	BIO_free_all(sock);
 }
 
@@ -53,7 +54,7 @@ int Net::makeconnect(std::string ip){
 		std::cout << "bio error:";
 		ERR_print_errors_fp(stdout);
 		std::cout << std::endl;
-		BIO_free_all(sock);
+		closed=1;
 		return -1;
 	}
 	return 0;
