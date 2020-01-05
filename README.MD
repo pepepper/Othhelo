@@ -1,6 +1,7 @@
 # Othhelo
 This is not othello, is this?  
 終了判定はあまりあてにならない(後述)  
+OpenSSL(https://www.openssl.org/)とOpenSiv3D(https://github.com/Siv3D/OpenSiv3D)を使用しています
 # ビルド
 https://siv3d.github.io/ja-jp/ をもとにOpenSiv3Dをインストール  
 またOpenSSLの開発用のファイルなども https://slproweb.com/products/Win32OpenSSL.html などからダウンロード  
