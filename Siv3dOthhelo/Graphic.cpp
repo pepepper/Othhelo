@@ -1,12 +1,56 @@
 ﻿#include "Graphic.h"
 #include <string>
+#include <chrono>
+#include <ctime>
 
-Setting::Setting(const InitData& init) : IScene(init) {
+KagawaCheck::KagawaCheck(const InitData& init) : IScene(init) {
 	if (!getData().termflag) {
 		getData().termflag = System::GetTerminationTriggers();
 		System::SetTerminationTriggers(0);
 	}
 	Window::SetTitle(U"オセロ?");
+}
+
+void KagawaCheck::update() {
+	FontAsset(U"Text")(U"香川県民ですか？").drawAt(Scene::Center().moveBy(0, -30), ColorF(0.0, 1.0));
+
+	if ((System::GetUserActions() & getData().termflag) != 0) {
+		System::Exit();
+	}
+
+	if (SimpleGUI::ButtonAt(U"はい", Scene::Center().moveBy(-50, 30), 60)) {
+		std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+		std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+		struct tm time;
+		localtime_s(&time,&now_c);
+		if (time.tm_hour<22) {
+			if (time.tm_wday>0||time.tm_wday<6) {
+				getData().kagawa = 1;
+				System::ShowMessageBox(U"香川県条例", U"条例により平日のプレイ時間は60分とします", MessageBoxStyle::Info, MessageBoxButtons::OK);
+			}
+			else {
+				getData().kagawa = 2;
+				System::ShowMessageBox(U"香川県条例", U"条例により休日のプレイ時間は90分とします", MessageBoxStyle::Info, MessageBoxButtons::OK);
+			}
+			changeScene(State::Setting);
+		}
+		else {
+			System::ShowMessageBox(U"香川県条例", U"条例により午後10時以降のプレイは禁止です", MessageBoxStyle::Info, MessageBoxButtons::OK);
+			System::Exit();
+		}
+	}
+	if (SimpleGUI::ButtonAt(U"いいえ", Scene::Center().moveBy(50, 30), 60)) {
+		getData().kagawa = 0;
+		changeScene(State::Setting);
+	}
+}
+
+void KagawaCheck::draw() const {
+
+}
+
+Setting::Setting(const InitData& init) : IScene(init) {
+
 }
 
 void Setting::update() {
@@ -27,9 +71,9 @@ void Setting::update() {
 			SimpleGUI::CheckBox(sizecheck, U"サイズ指定(0~8)", Vec2(128, 448));
 			if (sizecheck) {
 				FontAsset(U"Menu")(U"縦:").draw(Vec2(512, 448), ColorF(0.0, 0.5));
-				SimpleGUI::TextBox(texty, Vec2(544, 448),64);
+				SimpleGUI::TextBox(texty, Vec2(544, 448), 64);
 				FontAsset(U"Menu")(U"横:").draw(Vec2(640, 448), ColorF(0.0, 0.5));
-				SimpleGUI::TextBox(textx, Vec2(672, 448),64);
+				SimpleGUI::TextBox(textx, Vec2(672, 448), 64);
 			}
 			if (onlinemode == 0 || onlinemode == 1) {
 				SimpleGUI::CheckBox(passcheck, U"パスワード", Vec2(128, 512));
@@ -47,7 +91,7 @@ void Setting::update() {
 		}
 	}
 
-	if (SimpleGUI::ButtonAt(U"開始", Scene::Center().moveBy(0,300),500)) {
+	if (SimpleGUI::ButtonAt(U"開始", Scene::Center().moveBy(0, 300), 500)) {
 		if (getData().playmode == 0) {
 			if (sizecheck == 0) {
 				getData().game.reset(new Game());

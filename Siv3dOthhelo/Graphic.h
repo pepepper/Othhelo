@@ -5,21 +5,30 @@
 #include "net.h"
 enum class State
 {
+	Kagawa,
 	Setting,
 	Graph
 };
-struct SysState{
+struct SysState {
 	uint32 termflag;
 	size_t playmode;
 	int onlinemode;
 	std::unique_ptr<Game> game;
 	std::unique_ptr<Net> net;
 	long long room;
-	bool debug=false;
+	bool debug = false;
+	char kagawa = 0;
 };
-using MyApp = SceneManager<State,SysState>;
+using MyApp = SceneManager<State, SysState>;
 
-class Setting : public MyApp::Scene{
+class KagawaCheck : public MyApp::Scene {
+public:
+	KagawaCheck(const InitData& init);
+	void update() override;
+	void draw() const override;
+};
+
+class Setting : public MyApp::Scene {
 private:
 	bool passcheck = false, sizecheck = false;
 	TextEditState ip, room, pass, textx, texty;
@@ -31,10 +40,10 @@ public:
 };
 
 #include <thread>
-class Graph : public MyApp::Scene{
+class Graph : public MyApp::Scene {
 private:
-	bool freeput=false;
-	Texture black, white,bg;
+	bool freeput = false;
+	Texture black, white, bg;
 	std::thread netthread;
 public:
 	Graph(const InitData& init);

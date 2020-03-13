@@ -13,10 +13,11 @@ void Main() {
 	Scene::SetBackground(ColorF(0.2, 0.8, 0.4));
 	// 使用するフォントアセットを登録
 	FontAsset::Register(U"Menu", 20, Typeface::Bold);
-
+	FontAsset::Register(U"Text", 30, Typeface::Bold);
 	// シーンと遷移時の色を設定
 	MyApp manager;
 	manager
+		.add<KagawaCheck>(State::Kagawa)
 		.add<Setting>(State::Setting)
 		.add<Graph>(State::Graph);
 	while (System::Update()) {
