@@ -22,19 +22,17 @@ void KagawaCheck::update() {
 		std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 		std::time_t now_c = std::chrono::system_clock::to_time_t(now);
 		struct tm time;
-		localtime_s(&time,&now_c);
-		if (time.tm_hour<22) {
-			if (time.tm_wday>0||time.tm_wday<6) {
+		localtime_s(&time, &now_c);
+		if (time.tm_hour < 22) {
+			if (time.tm_wday > 0 || time.tm_wday < 6) {
 				getData().kagawa = 1;
 				System::ShowMessageBox(U"香川県条例", U"条例により平日のプレイ時間は60分とします", MessageBoxStyle::Info, MessageBoxButtons::OK);
-			}
-			else {
+			} else {
 				getData().kagawa = 2;
 				System::ShowMessageBox(U"香川県条例", U"条例により休日のプレイ時間は90分とします", MessageBoxStyle::Info, MessageBoxButtons::OK);
 			}
 			changeScene(State::Setting);
-		}
-		else {
+		} else {
 			System::ShowMessageBox(U"香川県条例", U"条例により午後10時以降のプレイは禁止です", MessageBoxStyle::Info, MessageBoxButtons::OK);
 			System::Exit();
 		}
@@ -50,7 +48,7 @@ void KagawaCheck::draw() const {
 }
 
 Setting::Setting(const InitData& init) : IScene(init) {
-
+	Window::SetTitle(U"オセロ?");
 }
 
 void Setting::update() {
@@ -80,8 +78,7 @@ void Setting::update() {
 				if (passcheck)SimpleGUI::TextBox(pass, Vec2(512, 512));
 			}
 		}
-	}
-	else {
+	} else {
 		SimpleGUI::CheckBox(sizecheck, U"サイズ指定(0~8)", Vec2(128, 320));
 		if (sizecheck) {
 			FontAsset(U"Menu")(U"縦:").draw(Vec2(512, 320), ColorF(0.0, 0.5));
@@ -95,8 +92,7 @@ void Setting::update() {
 		if (getData().playmode == 0) {
 			if (sizecheck == 0) {
 				getData().game.reset(new Game());
-			}
-			else {
+			} else {
 				int x = ParseOr<int>(textx.text, -1), y = ParseOr<int>(texty.text, -1);
 				if (x < 0 || y < 0 || x>8 || y>8) {
 					System::ShowMessageBox(U"エラー", U"サイズ指定が不正です", MessageBoxStyle::Error);
@@ -105,8 +101,7 @@ void Setting::update() {
 				getData().game.reset(new Game(x, y));
 				if (KeyD.pressed())getData().debug = true;
 			}
-		}
-		else {
+		} else {
 			getData().net.reset(new Net());
 			if (getData().net->makeconnect(ip.text.narrow())) {
 				System::ShowMessageBox(U"エラー", U"サーバーに接続できませんでした", MessageBoxStyle::Error);
@@ -115,8 +110,7 @@ void Setting::update() {
 			if (onlinemode == 0) {
 				if (sizecheck == 0) {
 					getData().game.reset(new Game());
-				}
-				else {
+				} else {
 					int x = ParseOr<int>(textx.text, -1), y = ParseOr<int>(texty.text, -1);
 					if (x < 0 || y < 0 || x>8 || y>8) {
 						System::ShowMessageBox(U"エラー", U"サイズ指定が不正です", MessageBoxStyle::Error);
@@ -126,8 +120,7 @@ void Setting::update() {
 				}
 				if (passcheck == 0) {
 					getData().room = getData().net->makeroom(getData().game->board->boardx / 2, getData().game->board->boardy / 2);
-				}
-				else {
+				} else {
 					getData().room = getData().net->makeroom(getData().game->board->boardx / 2, getData().game->board->boardy / 2, pass.text.narrow());
 				}
 				if (getData().room == -1) {
@@ -135,19 +128,16 @@ void Setting::update() {
 					return;
 				}
 				getData().onlinemode = -1;
-			}
-			else if (onlinemode == 1) {
+			} else if (onlinemode == 1) {
 				std::tuple<int, int> size;
 				try {
 					getData().room = ParseInt<long long>(room.text, Arg::radix = 16);
-				}
-				catch (ParseError & e) {
+				} catch (ParseError & e) {
 					System::ShowMessageBox(U"エラー", U"部屋番号が不正です", MessageBoxStyle::Error);
 				}
 				if (passcheck == 0) {
 					size = getData().net->login(getData().room);
-				}
-				else {
+				} else {
 					size = getData().net->login(getData().room, pass.text.narrow());
 				}
 				if (std::get<0>(size) == -1) {
@@ -156,8 +146,7 @@ void Setting::update() {
 				}
 				getData().game.reset(new Game(std::get<0>(size), std::get<1>(size)));
 				getData().onlinemode = 1;
-			}
-			else {
+			} else {
 				getData().room = getData().net->automatch();
 				if (getData().room == 0) {
 					getData().game.reset(new Game());
@@ -167,8 +156,7 @@ void Setting::update() {
 						return;
 					}
 					getData().onlinemode = -1;
-				}
-				else if (getData().room != -1) {
+				} else if (getData().room != -1) {
 					std::tuple<int, int> size;
 					size = getData().net->login(getData().room);
 					if (std::get<0>(size) == -1) {
@@ -177,8 +165,7 @@ void Setting::update() {
 					}
 					getData().game.reset(new Game(std::get<0>(size), std::get<1>(size)));
 					getData().onlinemode = 1;
-				}
-				else {
+				} else {
 					System::ShowMessageBox(U"エラー", U"オートマッチ中に不正な応答がありました", MessageBoxStyle::Error);
 					return;
 				}
@@ -208,21 +195,15 @@ Graph::Graph(const InitData& init) : IScene(init) {
 				std::tuple<std::string, int, int> action = getData().net->get();
 				if (std::get<0>(action).find("nodata") != std::string::npos) {
 					getData().net->closed = 1;
-				}
-				else if (std::get<0>(action).find("FREEPUT") != std::string::npos && getData().onlinemode != getData().game->turn) {
+				} else if (std::get<0>(action).find("FREEPUT") != std::string::npos && getData().onlinemode != getData().game->turn) {
 					getData().game->freeput(std::get<1>(action), std::get<2>(action));
 					netchangeturn(getData().onlinemode == getData().game->turn, getData().game->turn);
 					draw();
-				}
-				else if (std::get<0>(action).find("PUT") != std::string::npos && getData().onlinemode != getData().game->turn) {
+				} else if (std::get<0>(action).find("PUT") != std::string::npos && getData().onlinemode != getData().game->turn) {
 					getData().game->put(std::get<1>(action), std::get<2>(action));
 					netchangeturn(getData().onlinemode == getData().game->turn, getData().game->turn);
 					draw();
-				}
-				else if (std::get<0>(action).find("CLOSED") != std::string::npos) {
-					getData().net->closed = 1;
-				}
-				else if (std::get<0>(action).find("READY") != std::string::npos) {
+				}  else if (std::get<0>(action).find("READY") != std::string::npos) {
 					netchangeturn(getData().onlinemode == getData().game->turn, getData().game->turn);
 					getData().net->started = 1;
 					getData().net->ready = 1;
@@ -244,8 +225,7 @@ void Graph::update() {
 				if (getData().game->put(x, y)) {
 					if (getData().playmode == 1)getData().net->put(x, y);
 				}
-			}
-			else if (getData().game->freeput(x, y)) {
+			} else if (getData().game->freeput(x, y)) {
 				if (getData().playmode == 1)getData().net->freeput(x, y);
 			}
 			if (getData().playmode == 0)changeturn(getData().game->turn);
@@ -294,14 +274,15 @@ void Graph::netchangeturn(int you, int turn) {
 		if (turn == -1)title += U"黒";
 		else title += U"白";
 		title += U")です(Eキーで設定に戻る)";
-	}
-	else title += U"相手の番です(Eキーで設定に戻る)";
+	} else title += U"相手の番です(Eキーで設定に戻る)";
 	Window::SetTitle(title.c_str());
 }
 
 
 void Graph::netwait() {
-	Window::SetTitle(U"オセロ?:対戦相手待ち(Eキーで設定に戻る)");
+	String title = U"オセロ?:対戦相手待ち@" + Format(getData().room);
+	title += U"(Eキーで設定に戻る)";
+	Window::SetTitle(title.c_str());
 }
 
 void Graph::draw() const {
