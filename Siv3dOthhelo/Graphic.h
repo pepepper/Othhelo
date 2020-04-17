@@ -18,6 +18,7 @@ struct SysState {
 	long long room;
 	bool debug = false;
 	char kagawa = 0;
+	Timer kagawatimer;
 };
 using MyApp = SceneManager<State, SysState>;
 

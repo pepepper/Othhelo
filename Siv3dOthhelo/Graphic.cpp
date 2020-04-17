@@ -26,9 +26,11 @@ void KagawaCheck::update() {
 		if (time.tm_hour < 22) {
 			if (time.tm_wday > 0 || time.tm_wday < 6) {
 				getData().kagawa = 1;
+				getData().kagawatimer=Timer(3600,true);
 				System::ShowMessageBox(U"香川県条例", U"条例により平日のプレイ時間は60分とします", MessageBoxStyle::Info, MessageBoxButtons::OK);
 			} else {
 				getData().kagawa = 2;
+				getData().kagawatimer=Timer(5400,true);
 				System::ShowMessageBox(U"香川県条例", U"条例により休日のプレイ時間は90分とします", MessageBoxStyle::Info, MessageBoxButtons::OK);
 			}
 			changeScene(State::Setting);
@@ -177,6 +179,7 @@ void Setting::update() {
 	if ((System::GetUserActions() & getData().termflag) != 0) {
 		System::Exit();
 	}
+
 }
 
 void Setting::draw() const {
@@ -259,6 +262,10 @@ void Graph::update() {
 			}
 			System::Exit();
 		}
+	}
+	if(getData().kagawatimer.reachedZero()){
+		System::ShowMessageBox(U"香川県条例",U"本日のプレイ可能時間を超えました。 終了します",MessageBoxStyle::Warning);
+		System::Exit();
 	}
 }
 
