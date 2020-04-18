@@ -263,7 +263,7 @@ void Graph::update() {
 			System::Exit();
 		}
 	}
-	if(getData().kagawatimer.reachedZero()){
+	if(getData().kagawa!=0&&getData().kagawatimer.reachedZero()){
 		System::ShowMessageBox(U"香川県条例",U"本日のプレイ可能時間を超えました。 終了します",MessageBoxStyle::Warning);
 		System::Exit();
 	}
