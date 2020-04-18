@@ -43,8 +43,7 @@ int main(int argc, char *argv[]){
 	//部屋番号指定
 	try{
 		mode = intGetOption("モードを選択してください\n0:オフラインで交互にプレイする 1:オンラインでプレイする場合 :");
-		if(mode != 0 && mode != 1)throw std::invalid_argument("");
-		else if(mode == 0){//offline
+		if(mode == 0){//offline
 			if(intGetOption("盤面サイズを指定しますか?\n0:指定しない 1:指定する :") == 0) game.reset(new Game());
 			else{
 				std::string sx, sy;
@@ -63,8 +62,7 @@ int main(int argc, char *argv[]){
 				return 1;
 			}
 			netmode = intGetOption("モードを選択してください\n0:ホストとして部屋を立てる 1:ゲストとして部屋に入る 2:オートマッチング :");
-			if(netmode != 0 && netmode != 1&&netmode!=2)throw std::invalid_argument("");
-			else if(netmode == 0){//host
+			if(netmode == 0){//host
 				netmode = -1;
 				if(netret == -1){
 					std::cout << "通信エラー:終了します" << std::endl;
@@ -125,8 +123,8 @@ int main(int argc, char *argv[]){
 					}
 					game.reset(new Game(std::get<0>(size), std::get<1>(size)));
 				}
-			}
-		}
+			} else throw std::invalid_argument("");
+		} else  throw std::invalid_argument("");
 	} catch(const std::invalid_argument& e){
 		std::cout << "入力が不正です:終了します";
 		return 1;
